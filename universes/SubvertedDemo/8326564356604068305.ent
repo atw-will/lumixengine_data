@@ -1,0 +1,50 @@
+#name
+	"viewpoint"
+#transform (0.000000, 8.000000, 16.000000)  (0.000000, 0.000000, 0.000000, 1.000000)
+	0
+	1090519040
+	1098907648
+	0
+	0
+	0
+	1065353216
+#scale 1.000000
+	1065353216
+#parent
+	18446744073709551615
+#lua_script
+	4143584752
+#count
+	1
+#source
+	"scripts/floatcam.lua"
+#flags
+	1
+#prop_count
+	4
+#prop_name
+	"camera_entity"
+#prop_type
+	2
+#prop_value
+	"9905722862552152709"
+#prop_name
+	"PLAYER_SPEED"
+#prop_type
+	1
+#prop_value
+	"1.00000000"
+#prop_name
+	"input_enabled"
+#prop_type
+	0
+#prop_value
+	"true"
+#prop_name
+	"MOUSE_SENSITIVITY"
+#prop_type
+	1
+#prop_value
+	"1.00000000"
+#cmp_end
+	0
