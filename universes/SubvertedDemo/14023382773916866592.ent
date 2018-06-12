@@ -1,7 +1,7 @@
 #name
-	"house1"
-#transform (0.000000, 0.000000, -8.000000)  (0.000000, 0.000000, 0.000000, 1.000000)
-	0
+	"grass1"
+#transform (8.000000, 0.000000, -8.000000)  (0.000000, 0.000000, 0.000000, 1.000000)
+	1090519040
 	0
 	3238002688
 	0
@@ -15,7 +15,7 @@
 #renderable
 	1512583253
 #source
-	"models/buildings/town/house-small.msh"
+	"models/buildings/town/grass.msh"
 #flags
 	8
 #custom_materials
@@ -29,6 +29,6 @@
 #trigger
 	0
 #source
-	"models/buildings/town/house-small.phy"
+	"models/buildings/town/grass.phy"
 #cmp_end
 	0

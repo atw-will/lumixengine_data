@@ -1,13 +1,13 @@
 #name
-	"house1"
-#transform (0.000000, 0.000000, -8.000000)  (0.000000, 0.000000, 0.000000, 1.000000)
+	"office"
+#transform (0.000000, 0.000000, 8.000000)  (0.000000, 0.000000, 0.000000, -1.000000)
 	0
 	0
-	3238002688
+	1090519040
 	0
 	0
 	0
-	1065353216
+	3212836864
 #scale 1.000000
 	1065353216
 #parent
@@ -15,7 +15,7 @@
 #renderable
 	1512583253
 #source
-	"models/buildings/town/house-small.msh"
+	"models/buildings/town/building-office-small.msh"
 #flags
 	8
 #custom_materials
@@ -29,6 +29,6 @@
 #trigger
 	0
 #source
-	"models/buildings/town/house-small.phy"
+	"models/buildings/town/building-office-small.phy"
 #cmp_end
 	0

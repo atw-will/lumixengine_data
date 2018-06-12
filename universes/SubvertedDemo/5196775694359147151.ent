@@ -20,5 +20,15 @@
 	8
 #custom_materials
 	0
+#mesh_rigid_actor
+	1567933814
+#layer
+	0
+#dynamic_type
+	0
+#trigger
+	0
+#source
+	"models/buildings/town/road-straight-house-1-low.phy"
 #cmp_end
 	0

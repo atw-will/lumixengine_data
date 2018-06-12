@@ -1,0 +1,34 @@
+#name
+	"house2"
+#transform (16.000000, -1.000000, 8.000000)  (0.000000, -1.000000, 0.000000, -0.000000)
+	1098907648
+	3212836864
+	1090519040
+	0
+	3212836864
+	0
+	3007036718
+#scale 1.000000
+	1065353216
+#parent
+	1645783363191346253
+#renderable
+	1512583253
+#source
+	"models/buildings/town/house-modern.msh"
+#flags
+	8
+#custom_materials
+	0
+#mesh_rigid_actor
+	1567933814
+#layer
+	0
+#dynamic_type
+	0
+#trigger
+	0
+#source
+	"models/buildings/town/house-modern.phy"
+#cmp_end
+	0
