@@ -1,0 +1,34 @@
+#name
+	""
+#transform (-6.991389, -0.462923, -11.355345)  (0.000000, 0.000000, 0.000000, 1.000000)
+	3235887478
+	3203204160
+	3241521022
+	0
+	0
+	0
+	1065353216
+#scale 0.010000
+	1008981770
+#parent
+	18446744073709551615
+#renderable
+	1512583253
+#source
+	"models/buildings/house/house-mid.msh"
+#flags
+	8
+#custom_materials
+	0
+#mesh_rigid_actor
+	1567933814
+#layer
+	0
+#dynamic_type
+	0
+#trigger
+	0
+#source
+	"models/buildings/house/house-mid.phy"
+#cmp_end
+	0

@@ -1,0 +1,42 @@
+#name
+	"dude"
+#transform (16.000000, 1.100000, -5.900000)  (0.000000, 0.000000, 0.000000, 1.000000)
+	1098907648
+	1066192077
+	3233598669
+	0
+	0
+	0
+	1065353216
+#scale 0.470000
+	1055957975
+#parent
+	18446744073709551615
+#renderable
+	1512583253
+#source
+	"models/creatures/dude/dude.msh"
+#flags
+	8
+#custom_materials
+	0
+#animable
+	3505036238
+#time_scale 1.000000
+	1065353216
+#start_time 0.000000
+	0
+#animation
+	"models/creatures/dude/malearm_idle-m.ani"
+#navmesh_agent
+	3944425155
+#radius 0.500000
+	1056964608
+#height 1.000000
+	1065353216
+#use_root_motion
+	1
+#get_root_motion_from_animation_controller
+	1
+#cmp_end
+	0
