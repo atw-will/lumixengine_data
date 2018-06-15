@@ -1,6 +1,21 @@
-{
-	"shader" : "pipelines/rigid/rigid.shd",
-	"texture" : { "srgb" : true },
-	"texture" : {},
-	"color" : [1.0000000,0.7336719,0.4518759,1]
-}
+{"render_layer" : "default",
+"layers_count" : 0,
+"shader" : "pipelines/rigid/rigid.shd",
+"backface_culling" : true,
+"texture" : {"source" : ""},
+"texture" : {"source" : ""},
+"texture" : {"source" : ""},
+"texture" : {"source" : ""},
+"defines" : [],
+"uniforms" : [{"name" : "u_time",
+"time" : 0},
+{"name" : "u_parallaxScale",
+"float_value" : 0.00000000}],
+"metallic" : 0.43000002,
+"roughness" : 0.28000000,
+"emission" : 0.00000000,
+"alpha_ref" : 0.30000000,
+"color" : [1.00000000,
+0.19607843,
+0.19607843,
+1.00000000]}
