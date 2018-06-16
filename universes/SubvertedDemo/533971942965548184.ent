@@ -1,9 +1,9 @@
 #name
 	"dude"
-#transform (16.000000, 1.100000, -5.900000)  (0.000000, 0.000000, 0.000000, 1.000000)
-	1098907648
-	1066192077
-	3233598669
+#transform (15.784616, 1.153845, -5.076934)  (0.000000, 0.000000, 0.000000, 1.000000)
+	1098681802
+	1066643762
+	3231872574
 	0
 	0
 	0
@@ -20,6 +20,28 @@
 	8
 #custom_materials
 	0
+#lua_script
+	4143584752
+#count
+	1
+#source
+	"scripts/navigation.lua"
+#flags
+	1
+#prop_count
+	2
+#prop_name
+	"speed"
+#prop_type
+	1
+#prop_value
+	"5.00000000"
+#prop_name
+	"stopdist"
+#prop_type
+	1
+#prop_value
+	"0.20000000"
 #animable
 	3505036238
 #time_scale 1.000000
@@ -35,8 +57,8 @@
 #height 1.000000
 	1065353216
 #use_root_motion
-	1
+	0
 #get_root_motion_from_animation_controller
-	1
+	0
 #cmp_end
 	0
