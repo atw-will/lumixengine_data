@@ -26,5 +26,141 @@
 	1036831949
 #slot
 	"main"
+#lua_script
+	4143584752
+#count
+	3
+#source
+	"pipelines/ssao/ssao.lua"
+#flags
+	1
+#prop_count
+	3
+#prop_name
+	"radius"
+#prop_type
+	1
+#prop_value
+	"0.09000000"
+#prop_name
+	"intensity"
+#prop_type
+	1
+#prop_value
+	"1.50000000"
+#prop_name
+	"blur_enabled"
+#prop_type
+	0
+#prop_value
+	"true"
+#source
+	"pipelines/postprocess_basic/postprocess_basic.lua"
+#flags
+	1
+#prop_count
+	15
+#prop_name
+	"lut_texture"
+#prop_type
+	3
+#prop_value
+	""
+#prop_name
+	"vignette_radius"
+#prop_type
+	1
+#prop_value
+	"0.50000000"
+#prop_name
+	"dof_near_blur"
+#prop_type
+	1
+#prop_value
+	"0.00000000"
+#prop_name
+	"bloom_cutoff"
+#prop_type
+	1
+#prop_value
+	"1.00000000"
+#prop_name
+	"dof_far_blur"
+#prop_type
+	1
+#prop_value
+	"15.00000000"
+#prop_name
+	"fxaa_enabled"
+#prop_type
+	0
+#prop_value
+	"true"
+#prop_name
+	"dof_enabled"
+#prop_type
+	0
+#prop_value
+	"false"
+#prop_name
+	"grain_amount"
+#prop_type
+	1
+#prop_value
+	"0.02200000"
+#prop_name
+	"dof_near_sharp"
+#prop_type
+	1
+#prop_value
+	"1.00000000"
+#prop_name
+	"film_grain_enabled"
+#prop_type
+	0
+#prop_value
+	"false"
+#prop_name
+	"bloom_enabled"
+#prop_type
+	0
+#prop_value
+	"false"
+#prop_name
+	"vignette_enabled"
+#prop_type
+	0
+#prop_value
+	"false"
+#prop_name
+	"vignette_softness"
+#prop_type
+	1
+#prop_value
+	"0.35000000"
+#prop_name
+	"grain_size"
+#prop_type
+	1
+#prop_value
+	"0.70340004"
+#prop_name
+	"dof_far_sharp"
+#prop_type
+	1
+#prop_value
+	"5.00000000"
+#source
+	"pipelines/sky/sky.lua"
+#flags
+	1
+#prop_count
+	1
+#prop_name
+	"sky_material"
+#prop_type
+	3
+#prop_value
+	"models/sky/clouded01/sky.mat"
 #cmp_end
 	0

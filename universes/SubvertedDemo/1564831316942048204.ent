@@ -1,0 +1,48 @@
+#name
+	""
+#transform (0.000000, 0.000000, 0.000000)  (0.000000, 0.000000, 0.000000, 1.000000)
+	0
+	0
+	0
+	0
+	0
+	0
+	1065353216
+#scale 1.000000
+	1065353216
+#parent
+	5199790025164318757
+#gui_rect
+	41313106
+#flags
+	3
+#top_pts 0.000000
+	0
+#top_rel 1.000000
+	1065353216
+#right_pts 0.000000
+	0
+#right_rel 1.000000
+	1065353216
+#bottom_pts 0.000000
+	0
+#bottom_rel 0.000000
+	0
+#left_pts 0.000000
+	0
+#left_rel 0.000000
+	0
+#gui_text
+	2385245972
+#font
+	"ui/fonts/opensans-bold.ttf"
+#align
+	1
+#color
+	4278190080
+#font_size
+	24
+#text
+	"LARGE FLANGE"
+#cmp_end
+	0
