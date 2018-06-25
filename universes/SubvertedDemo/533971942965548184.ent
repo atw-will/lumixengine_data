@@ -35,21 +35,19 @@
 #prop_type
 	1
 #prop_value
-	"5.00000000"
+	"4.00000000"
 #prop_name
 	"stopdist"
 #prop_type
 	1
 #prop_value
 	"0.20000000"
-#animable
-	3505036238
-#time_scale 1.000000
-	1065353216
-#start_time 0.000000
+#anim_controller
+	284548379
+#source
+	"models/creatures/dude/dude.act"
+#default_set
 	0
-#animation
-	"models/creatures/dude/malearm_idle-m.ani"
 #navmesh_agent
 	3944425155
 #radius 0.500000
