@@ -1,9 +1,9 @@
 #name
-	"dude1"
-#transform (17.867004, 1.113663, -4.862009)  (0.000000, 0.000000, 0.000000, 1.000000)
-	1099886496
-	1066306688
-	3231421844
+	"dude2"
+#transform (7.783379, 1.208957, -3.559291)  (0.000000, 0.000000, 0.000000, 1.000000)
+	1090064752
+	1067106077
+	3227765612
 	0
 	0
 	0
@@ -21,13 +21,13 @@
 #custom_materials
 	1
 #
-	"models/creatures/dude/maleskin.mat"
+	"models/creatures/dude/blueskin.mat"
 #lua_script
 	4143584752
 #count
 	2
 #source
-	"scripts/navigation.lua"
+	"scripts/npc_navigation.lua"
 #flags
 	1
 #prop_count
