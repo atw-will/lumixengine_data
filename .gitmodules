@@ -1,0 +1,3 @@
+[submodule "scripts/maf"]
+	path = scripts/maf
+	url = https://github.com/bjornbytes/maf.git

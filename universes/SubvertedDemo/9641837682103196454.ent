@@ -22,6 +22,18 @@
 	1
 #
 	"models/creatures/dude/blueskin.mat"
+#physical_controller
+	3741564514
+#layer
+	0
+#radius 0.100000
+	1036831949
+#height 0.100000
+	1036831949
+#custom_gravity
+	1
+#custom_gravity_acceleration 0.000000
+	0
 #lua_script
 	4143584752
 #count
@@ -55,19 +67,19 @@
 #prop_type
 	2
 #prop_value
-	"18446744073709551615"
+	"7885226646555623184"
 #prop_name
 	"audioRange"
 #prop_type
 	1
 #prop_value
-	"0.00000000"
+	"8.00000000"
 #prop_name
 	"visualRange"
 #prop_type
 	1
 #prop_value
-	"0.00000000"
+	"16.00000000"
 #anim_controller
 	284548379
 #source
@@ -76,10 +88,10 @@
 	0
 #navmesh_agent
 	3944425155
-#radius 0.500000
-	1056964608
-#height 1.000000
-	1065353216
+#radius 0.100000
+	1036831949
+#height 0.100000
+	1036831949
 #use_root_motion
 	0
 #get_root_motion_from_animation_controller
