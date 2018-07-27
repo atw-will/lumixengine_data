@@ -16,13 +16,44 @@ Editor.setPropertyType("audioRange", Editor.FLOAT_PROPERTY)
 visualRange = 0.0
 Editor.setPropertyType("visualRange", Editor.FLOAT_PROPERTY)
 
+showDebugLine = true
+Editor.setPropertyType("showDebugLine", Editor.BOOLEAN_PROPERTY)
+
 local visualRangeObjects = {}
 local visualSensed = {}
 local audioSensed = {}
 
 function init()
     clear()
+
+
 end
+
+function update(time_delta)
+	-- display a debug line from the character to every object it can sense
+	if(showDebugLine) then
+		-- local position = Engine.getEntityPosition(g_universe, this)
+
+		if viewpoint~=-1 then
+			startPos = Engine.getEntityPosition(g_universe,  viewpoint)
+		else
+			startPos = Engine.getEntityPosition(g_universe, this)
+		end
+
+		-- draw lines in blue to visual contacts
+		for index,sensed in ipairs(visualSensed) do
+			local targetPos = get_Vec3(sensed["pos"])
+			Renderer.addDebugLine(g_scene_renderer,startPos,targetPos, 0x0000FFFF, 0)
+		end
+		
+		-- draw lines in green to audio contacts
+		for index,sensed in ipairs(audioSensed) do
+			local targetPos = get_Vec3(sensed["pos"])
+			Renderer.addDebugLine(g_scene_renderer,startPos,targetPos, 0x00FF00FF, 0)
+		end
+	end
+end
+
 
 function clear()
 	count = #visualRangeObjects
@@ -112,12 +143,12 @@ function check_LOS()
 		dirVec:normalize()
 		Engine.logInfo("Entity:" .. entity .. " Position:".. position.x .. "," .. position.y .. "," .. position.z .. " Direction:" .. dirVec.x .. "," .. dirVec.y .. "," .. dirVec.z)
 		
-		is_hit, hit_entity, hit_position = Physics.raycast(g_scene_physics, get_Vec3(startPos), get_Vec3(dirVec))
+		is_hit, hit_entity, hit_position = Physics.raycast(g_scene_physics, get_Vec3(startPos), get_Vec3(dirVec),1)
 		if is_hit then
 			Engine.logInfo("Hit Entity " .. hit_entity)
 			if hit_entity == entity then 
 				Engine.logInfo("Hit the right thing! Wow!")
-				visualSensed.insert(target)
+				table.insert(visualSensed,target)
 			end
         end
 	end

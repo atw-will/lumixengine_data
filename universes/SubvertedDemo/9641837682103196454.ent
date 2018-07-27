@@ -25,7 +25,7 @@
 #physical_controller
 	3741564514
 #layer
-	0
+	1
 #radius 0.100000
 	1036831949
 #height 0.100000
@@ -37,7 +37,7 @@
 #lua_script
 	4143584752
 #count
-	2
+	3
 #source
 	"scripts/npc_navigation.lua"
 #flags
@@ -61,7 +61,7 @@
 #flags
 	1
 #prop_count
-	3
+	4
 #prop_name
 	"viewpoint"
 #prop_type
@@ -79,7 +79,19 @@
 #prop_type
 	1
 #prop_value
-	"16.00000000"
+	"40.00000000"
+#prop_name
+	"showDebugLine"
+#prop_type
+	0
+#prop_value
+	"true"
+#source
+	"scripts/character.lua"
+#flags
+	1
+#prop_count
+	0
 #anim_controller
 	284548379
 #source

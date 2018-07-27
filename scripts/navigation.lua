@@ -21,13 +21,17 @@ function update(time_delta)
 end
 
 
+function travelTo(pos)
+	Navigation.navigate(g_scene_navigation, this, pos, speed, stopdist)
+end
+
 function onInputEvent(event)
 if event.type == Engine.INPUT_EVENT_BUTTON then
     if event.device.type == Engine.INPUT_DEVICE_MOUSE then
         if event.key_id == 1 then
             local is_hit, pos = Renderer.castCameraRay(g_scene_renderer, "main", event.x_abs, event.y_abs)
             if is_hit then
-                Navigation.navigate(g_scene_navigation, this, pos, speed, stopdist)
+                travelTo(pos)
             end
         end
     end

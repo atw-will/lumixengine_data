@@ -1,4 +1,7 @@
-Navigation.load(g_scene_navigation, "universes/subverted.nav")
+-- AI character behaviour management
+-- Handles memory, decision points
+-- calls on npc_navigation.lua, sensorium.lua, and character.lua
+
 speed = 4
 stopdist = 0.2
 local ANIM_CONTROLLER_TYPE = Engine.getComponentType("anim_controller")
