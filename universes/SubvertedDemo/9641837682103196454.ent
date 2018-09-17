@@ -22,18 +22,6 @@
 	1
 #
 	"models/creatures/dude/blueskin.mat"
-#physical_controller
-	3741564514
-#layer
-	1
-#radius 0.100000
-	1036831949
-#height 0.100000
-	1036831949
-#custom_gravity
-	1
-#custom_gravity_acceleration 0.000000
-	0
 #lua_script
 	4143584752
 #count

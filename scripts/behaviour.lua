@@ -18,6 +18,8 @@ function update(time_delta)
     -- so it can play the right animation
     local agent_speed = Navigation.getAgentSpeed(g_scene_navigation, this)
     Animation.setControllerFloatInput(g_scene_animation, this, speed_input_idx, agent_speed)
+
+
 end
 
 function travelTo(pos)

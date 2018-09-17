@@ -40,16 +40,17 @@ function update(time_delta)
 			startPos = Engine.getEntityPosition(g_universe, this)
 		end
 
-		-- draw lines in blue to visual contacts
+		-- draw lines in red to visual contacts
 		for index,sensed in ipairs(visualSensed) do
 			local targetPos = get_Vec3(sensed["pos"])
-			Renderer.addDebugLine(g_scene_renderer,startPos,targetPos, 0x0000FFFF, 0)
+			Renderer.addDebugLine(g_scene_renderer,startPos,targetPos, 0xFFFF0000, 0)
 		end
 		
-		-- draw lines in green to audio contacts
+		-- draw lines in blue to audio contacts
 		for index,sensed in ipairs(audioSensed) do
 			local targetPos = get_Vec3(sensed["pos"])
-			Renderer.addDebugLine(g_scene_renderer,startPos,targetPos, 0x00FF00FF, 0)
+			-- colour is ARGB
+			-- Renderer.addDebugLine(g_scene_renderer,startPos,targetPos, 0xFF0000FF, 0)
 		end
 	end
 end
@@ -77,12 +78,12 @@ end
 function get_range()
 
 	currPos = get_vector(Engine.getEntityPosition(g_universe,  this))
-	-- check all objects stemming from map_root and char_root 
+	-- check all objects stemming from object_root and char_root 
 	
-	map_root = Engine.findByName(g_universe,-1,"map_root")
-	if map_root == -1 then Engine.logInfo("map_root not found") end
-	child = Engine.getFirstChild(g_universe, map_root)
-	if child == -1 or child == nil then Engine.logInfo("No Children Found For map_root") end
+	object_root = Engine.findByName(g_universe,-1,"object_root")
+	if object_root == -1 then Engine.logInfo("object_root not found") end
+	child = Engine.getFirstChild(g_universe, object_root)
+	if child == -1 or child == nil then Engine.logInfo("No Children Found For object_root") end
 	
 	while child ~= nil and child ~= -1 do
 		newPos = get_vector(Engine.getEntityPosition(g_universe, child))
@@ -106,7 +107,9 @@ function get_range()
 	if child == -1 or child == nil then Engine.logInfo("No Children Found For char_root") end
 
 	while child ~= nil and child ~= -1 do
-		newPos = get_vector(Engine.getEntityPosition(g_universe, child))
+		-- get the collider child of the character
+		colldier_child = Engine.findByName(g_universe, child, "Collider")
+		newPos = get_vector(Engine.getEntityPosition(g_universe, colldier_child))
 		between = currPos - newPos;
 		dist = between:length()
 		
@@ -138,12 +141,15 @@ function check_LOS()
 
 	for index,target in ipairs(visualRangeObjects) do
 		position = target["pos"]
-		entity = target["entity"]
+		entity = Engine.findByName(g_universe, target["entity"], "Collider")
+		if (entity==-1) then
+			entity = target["entity"]
+		end
 		dirVec = position - startPos
 		dirVec:normalize()
-		Engine.logInfo("Entity:" .. entity .. " Position:".. position.x .. "," .. position.y .. "," .. position.z .. " Direction:" .. dirVec.x .. "," .. dirVec.y .. "," .. dirVec.z)
+		Engine.logInfo("Entity:" .. entity ..  " Position:".. position.x .. "," .. position.y .. "," .. position.z .. " Direction:" .. dirVec.x .. "," .. dirVec.y .. "," .. dirVec.z)
 		
-		is_hit, hit_entity, hit_position = Physics.raycast(g_scene_physics, get_Vec3(startPos), get_Vec3(dirVec),1)
+		is_hit, hit_entity, hit_position = Physics.raycast(g_scene_physics, get_Vec3(startPos), get_Vec3(dirVec),0)
 		if is_hit then
 			Engine.logInfo("Hit Entity " .. hit_entity)
 			if hit_entity == entity then 
