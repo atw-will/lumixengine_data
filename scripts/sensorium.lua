@@ -16,47 +16,76 @@ Editor.setPropertyType("audioRange", Editor.FLOAT_PROPERTY)
 visualRange = 0.0
 Editor.setPropertyType("visualRange", Editor.FLOAT_PROPERTY)
 
-showDebugLine = true
-Editor.setPropertyType("showDebugLine", Editor.BOOLEAN_PROPERTY)
+-- determine if we show the observation lines when we see something
+showAudioDebugLine = true
+Editor.setPropertyType("showAudioDebugLine", Editor.BOOLEAN_PROPERTY)
 
+showVisualDebugLine = true
+Editor.setPropertyType("showVisualDebugLine", Editor.BOOLEAN_PROPERTY)
+
+showMemoryDebugLine = true
+Editor.setPropertyType("showMemoryDebugLine", Editor.BOOLEAN_PROPERTY)
+
+-- these tables contain the sensory data and are cleared every time there is a sense event
+-- format : {entity, distance, position}
 local visualRangeObjects = {}
 local visualSensed = {}
 local audioSensed = {}
 
+-- this table contains the sensory memory and is updated but not cleared when there is a sense event
+-- format : {entity, position, age}
+memorySense = {}
+
 function init()
-    clear()
-
-
+    clear_memory()
+	clear_senses()
 end
 
 function update(time_delta)
+	-- age all the memories
+	for index,memory in ipairs(memorySense) do
+		Engine.logInfo("Ageing Memory:" .. memory)
+		memory["age"] = memory["age"] + time_delta
+	end
+	
 	-- display a debug line from the character to every object it can sense
-	if(showDebugLine) then
-		-- local position = Engine.getEntityPosition(g_universe, this)
 
-		if viewpoint~=-1 then
-			startPos = Engine.getEntityPosition(g_universe,  viewpoint)
-		else
-			startPos = Engine.getEntityPosition(g_universe, this)
-		end
+	if viewpoint~=-1 then
+		startPos = Engine.getEntityPosition(g_universe,  viewpoint)
+	else
+		startPos = Engine.getEntityPosition(g_universe, this)
+	end
 
+	if(showVisualDebugLine) then
 		-- draw lines in red to visual contacts
 		for index,sensed in ipairs(visualSensed) do
-			local targetPos = get_Vec3(sensed["pos"])
+			local targetPos = get_Vec3(sensed["position"])
 			Renderer.addDebugLine(g_scene_renderer,startPos,targetPos, 0xFFFF0000, 0)
 		end
-		
+	end	
+
+	if(showAudioDebugLine) then
 		-- draw lines in blue to audio contacts
 		for index,sensed in ipairs(audioSensed) do
-			local targetPos = get_Vec3(sensed["pos"])
+			local targetPos = get_Vec3(sensed["position"])
 			-- colour is ARGB
-			-- Renderer.addDebugLine(g_scene_renderer,startPos,targetPos, 0xFF0000FF, 0)
+			Renderer.addDebugLine(g_scene_renderer,startPos,targetPos, 0xFF0000FF, 0)
 		end
 	end
+
+	if(showMemoryDebugLine) then
+		-- draw lines in green to remembered locations
+		for index,memory in ipairs(memorySense) do
+			Engine.logInfo("Drawing Memory Line:" .. memory)
+			local targetPos = getVec3(memory["position"])
+			Renderer.addDebugLine(g_scene_renderer, startPos, targetPos, 0xFF00FF00, 0)
+		end
+	end
+
 end
 
 
-function clear()
+function clear_senses()
 	count = #visualRangeObjects
 	for i=0, count do visualRangeObjects[i]=nil end
 
@@ -67,6 +96,11 @@ function clear()
 	for i=0, count do audioSensed[i]=nil end
 end
 
+function clear_memory()
+	count = #memorySense
+	for i=0, count do memorySense[i]=nil end
+end
+
 function get_vector(arrayVersion)
 	return maf.vector(arrayVersion[1],arrayVersion[2],arrayVersion[3])
 end
@@ -75,7 +109,7 @@ function get_Vec3(vectorVersion)
 	return {vectorVersion.x, vectorVersion.y, vectorVersion.z}
 end
 
-function get_range()
+function pull_get_range()
 
 	currPos = get_vector(Engine.getEntityPosition(g_universe,  this))
 	-- check all objects stemming from object_root and char_root 
@@ -91,11 +125,11 @@ function get_range()
 		dist = between:length()
 
 		if dist < visualRange then
-			table.insert(visualRangeObjects, {entity=child, distance=dist, pos=newPos})
+			table.insert(visualRangeObjects, {entity=child, distance=dist, position=newPos})
 		end
 
 		if dist < audioRange then
-			table.insert(audioSensed, {entity=child, distance=dist, pos=newPos})
+			table.insert(audioSensed, {entity=child, distance=dist, position=newPos})
 		end
 		
 		child = Engine.getNextSibling(g_universe, child)
@@ -114,12 +148,12 @@ function get_range()
 		dist = between:length()
 		
 		if dist < visualRange then
-			store = {entity=child, distance=dist, pos=newPos}
+			store = {entity=child, distance=dist, position=newPos}
 			table.insert(visualRangeObjects, store)
 		end
 
 		if dist < audioRange then
-			store = {entity=child, distance=dist, pos=newPos}
+			store = {entity=child, distance=dist, position=newPos}
 			table.insert(audioSensed, store)
 		end
 
@@ -128,41 +162,63 @@ function get_range()
 
 end
 
-function check_LOS()
+function pull_check_LOS()
 	local startPos = maf.vector(0,0,0)
 
 	if viewpoint~=-1 then
 		startPos = get_vector(Engine.getEntityPosition(g_universe,  viewpoint))
-		Engine.logInfo("Viewpoint Entity:" .. viewpoint)
 	else
 		startPos = get_vector(Engine.getEntityPosition(g_universe, this))
-		Engine.logInfo("No Viewpoint Entity:" .. this)
 	end
 
 	for index,target in ipairs(visualRangeObjects) do
-		position = target["pos"]
+		position = target["position"]
 		entity = Engine.findByName(g_universe, target["entity"], "Collider")
 		if (entity==-1) then
 			entity = target["entity"]
 		end
 		dirVec = position - startPos
 		dirVec:normalize()
-		Engine.logInfo("Entity:" .. entity ..  " Position:".. position.x .. "," .. position.y .. "," .. position.z .. " Direction:" .. dirVec.x .. "," .. dirVec.y .. "," .. dirVec.z)
-		
+				
 		is_hit, hit_entity, hit_position = Physics.raycast(g_scene_physics, get_Vec3(startPos), get_Vec3(dirVec),0)
 		if is_hit then
-			Engine.logInfo("Hit Entity " .. hit_entity)
-			if hit_entity == entity then 
-				Engine.logInfo("Hit the right thing! Wow!")
+			this_entity = Engine.findByName(g_universe, this, "Collider")
+			if (hit_entity == entity) and not (hit_entity == this_entity) then 
 				table.insert(visualSensed,target)
 			end
         end
 	end
 end
 
-function observe()
-    Engine.logInfo("observing...")
-	clear()
-	get_range()
-	check_LOS()
+function update_memory()
+	for index,target in ipairs(visualSensed,target) do
+		entity = target["entity"]
+		position = target["position"]
+		if memorySense[entity] == nil then
+			Engine.logInfo("Making Memory:" .. entity)
+			entry = {entity = entity, position = position, age = 0.0}
+			memorySense[entity] = entry
+		else
+			Engine.logInfo("Updating Memory:" .. entity)
+			memorySense[entity].position = position
+			memorySense[entity].age = 0.0
+		end
+	end
+end
+
+function pull_stimuli()
+	clear_senses()
+	pull_get_range()
+	pull_check_LOS()
+	update_memory()
+end
+
+function push_stimulus(entity, position)
+	if memorySense[entity] == nil then
+		entry = {entity = entity, position = position, age = 0.0}
+		memorySense[entity] = entry
+	else
+		memorySense[entity].position = position
+		memorySense[entity].age = 0.0
+	end
 end
