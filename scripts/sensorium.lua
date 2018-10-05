@@ -34,7 +34,7 @@ local audioSensed = {}
 
 -- this table contains the sensory memory and is updated but not cleared when there is a sense event
 -- format : {entity, position, age}
-memorySense = {}
+local memorySense = {}
 
 function init()
     clear_memory()
@@ -74,10 +74,8 @@ function update(time_delta)
 	end
 
 	if(showMemoryDebugLine) then
-		-- draw lines in green to remembered locations
-		for index,memory in ipairs(memorySense) do
-			Engine.logInfo("Drawing Memory Line:" .. memory)
-			local targetPos = getVec3(memory["position"])
+		for index,memory in pairs(memorySense) do
+			local targetPos = get_Vec3(memory["position"])
 			Renderer.addDebugLine(g_scene_renderer, startPos, targetPos, 0xFF00FF00, 0)
 		end
 	end
@@ -97,6 +95,7 @@ function clear_senses()
 end
 
 function clear_memory()
+	Engine.logInfo("-- CLEARING MEMORY --")
 	count = #memorySense
 	for i=0, count do memorySense[i]=nil end
 end
