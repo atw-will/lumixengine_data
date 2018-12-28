@@ -23,7 +23,9 @@ local basic_needs = { Hunger=10.0 } -- we will add Sleep later. Rest will be bas
 local counters = {}
 
 function init()
+Engine.logInfo("-- CHARACTER SETUP --")
 
+Engine.logInfo("-- CHARACTER SETUP END --")
 end
 
 function addCounter(name, time)
@@ -31,6 +33,7 @@ function addCounter(name, time)
 end
 
 function update(time_delta)
+
 -- run all the counters
 	for key, value in pairs(counters) do
 		counters[key] = counters[key] - time_delta

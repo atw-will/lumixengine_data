@@ -49,7 +49,7 @@
 #flags
 	1
 #prop_count
-	7
+	6
 #prop_name
 	"viewpoint"
 #prop_type
@@ -69,11 +69,11 @@
 #prop_value
 	"40.00000000"
 #prop_name
-	"memorySense"
+	"showMemoryDebugLine"
 #prop_type
-	1
+	0
 #prop_value
-	"0.00000000"
+	"true"
 #prop_name
 	"showAudioDebugLine"
 #prop_type
@@ -82,12 +82,6 @@
 	"true"
 #prop_name
 	"showVisualDebugLine"
-#prop_type
-	0
-#prop_value
-	"true"
-#prop_name
-	"showMemoryDebugLine"
 #prop_type
 	0
 #prop_value

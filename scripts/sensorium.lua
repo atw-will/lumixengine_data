@@ -27,13 +27,13 @@ showMemoryDebugLine = true
 Editor.setPropertyType("showMemoryDebugLine", Editor.BOOLEAN_PROPERTY)
 
 -- these tables contain the sensory data and are cleared every time there is a sense event
--- format : {entity, distance, position}
+-- format : {entity, distance, position} in array format 
 local visualRangeObjects = {}
 local visualSensed = {}
 local audioSensed = {}
 
 -- this table contains the sensory memory and is updated but not cleared when there is a sense event
--- format : {entity, position, age}
+-- format : {entity, position, age} keyed by entity id
 local memorySense = {}
 
 function init()
@@ -43,13 +43,14 @@ end
 
 function update(time_delta)
 	-- age all the memories
-	for index,memory in ipairs(memorySense) do
-		Engine.logInfo("Ageing Memory:" .. memory)
-		memory["age"] = memory["age"] + time_delta
-	end
-	
-	-- display a debug line from the character to every object it can sense
 
+	for key,memory in pairs(memorySense) do
+		Engine.logInfo("Ageing Memory:" .. key)
+		memory["age"] = memory["age"] + time_delta
+		Engine.logInfo("Memory " .. key .. " aged to " .. memory["age"])
+	end
+
+	-- display a debug line from the character to every object it can sense
 	if viewpoint~=-1 then
 		startPos = Engine.getEntityPosition(g_universe,  viewpoint)
 	else
@@ -79,7 +80,6 @@ function update(time_delta)
 			Renderer.addDebugLine(g_scene_renderer, startPos, targetPos, 0xFF00FF00, 0)
 		end
 	end
-
 end
 
 
@@ -95,9 +95,7 @@ function clear_senses()
 end
 
 function clear_memory()
-	Engine.logInfo("-- CLEARING MEMORY --")
-	count = #memorySense
-	for i=0, count do memorySense[i]=nil end
+	for key,memory in pairs(memorySense) do memorySense[key] = {} end
 end
 
 function get_vector(arrayVersion)
@@ -213,7 +211,7 @@ function pull_stimuli()
 end
 
 function push_stimulus(entity, position)
-	if memorySense[entity] == nil then
+	if memorySense[entity] == {} then
 		entry = {entity = entity, position = position, age = 0.0}
 		memorySense[entity] = entry
 	else

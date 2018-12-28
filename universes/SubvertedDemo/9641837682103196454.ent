@@ -25,7 +25,7 @@
 #lua_script
 	4143584752
 #count
-	3
+	4
 #source
 	"scripts/npc_navigation.lua"
 #flags
@@ -49,7 +49,7 @@
 #flags
 	1
 #prop_count
-	7
+	6
 #prop_name
 	"viewpoint"
 #prop_type
@@ -69,11 +69,11 @@
 #prop_value
 	"40.00000000"
 #prop_name
-	"memorySense"
+	"showMemoryDebugLine"
 #prop_type
-	1
+	0
 #prop_value
-	"0.00000000"
+	"true"
 #prop_name
 	"showAudioDebugLine"
 #prop_type
@@ -86,18 +86,30 @@
 	0
 #prop_value
 	"true"
-#prop_name
-	"showMemoryDebugLine"
-#prop_type
-	0
-#prop_value
-	"true"
 #source
 	"scripts/character.lua"
 #flags
 	1
 #prop_count
 	0
+#source
+	"scripts/behaviour.lua"
+#flags
+	1
+#prop_count
+	2
+#prop_name
+	"current_behaviour"
+#prop_type
+	4
+#prop_value
+	"0.00000000"
+#prop_name
+	"current_anim"
+#prop_type
+	1
+#prop_value
+	"Interaction"
 #anim_controller
 	284548379
 #source
