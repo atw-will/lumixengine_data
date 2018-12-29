@@ -45,9 +45,9 @@ function update(time_delta)
 	-- age all the memories
 
 	for key,memory in pairs(memorySense) do
-		Engine.logInfo("Ageing Memory:" .. key)
+		--Engine.logInfo("Ageing Memory:" .. key)
 		memory["age"] = memory["age"] + time_delta
-		Engine.logInfo("Memory " .. key .. " aged to " .. memory["age"])
+		--Engine.logInfo("Memory " .. key .. " aged to " .. memory["age"])
 	end
 
 	-- display a debug line from the character to every object it can sense
@@ -196,7 +196,7 @@ function update_memory()
 			entry = {entity = entity, position = position, age = 0.0}
 			memorySense[entity] = entry
 		else
-			Engine.logInfo("Updating Memory:" .. entity)
+			-- Engine.logInfo("Updating Memory:" .. entity)
 			memorySense[entity].position = position
 			memorySense[entity].age = 0.0
 		end

@@ -44,7 +44,7 @@ Engine.logInfo("-- BEHAVIOUR SETUP --")
 	behaviour_set = {
 		Walk = { Type = Move_Type, Anim = Anim_Walk, Anim_End = false, Triggers_Decision = false, Push_Range = 0, Pull_Range = 30, Location = nil, Data = nil},
 		Run = { Type = Move_Type, Anim = Anim_Run, Anim_End = false, Triggers_Decision = false, Push_Range = 0, Pull_Range = 10, Location = nil, Data = nil},
-		Idle = { Type = Idle_Type, Anim = Anim_Idle, Anim_End = false, Triggers_Decision = false, Push_Range = 0, Pull_Range = 30, Location = nil, Data = nil},
+		Idle = { Type = Idle_Type, Anim = Anim_Idle, Anim_End = false, Triggers_Decision = true, Push_Range = 0, Pull_Range = 30, Location = nil, Data = nil},
 		Interact = { Type = Interact_Type, Anim = Anim_Offhand, Anim_End = false, Triggers_Decision = false, Push_Range = 0, Pull_Range = 30, Location = nil, Data = nil},
 --		Drag = { Type = Move_Type, Anim = Anim_Walk, Anim_End = false, Triggers_Decision = false, Push_Range = 0, Pull_Range = 30, Location = nil, Data = nil},
 		Attack = { Type = Interaction_Type, Anim = Anim_Attack, Anim_End = false, Triggers_Decision = false, Push_Range = 0, Pull_Range = 30, Location = nil, Data = nil}
@@ -58,13 +58,64 @@ Engine.logInfo("-- BEHAVIOUR SETUP END --")
 end
 
 function update(time_delta)
-	
+	if(behaviour_set[current_behaviour].Pull_Range > 0) then
+		-- we want to pull stimuli during this animation
+		local env = LuaScript.getEnvironment(g_scene_lua_script, this, 1);
+		if env ~= nil and env.pull_stimuli ~= nil then
+				-- Engine.logInfo("-- Pulling Stimuli --")
+				env.pull_stimuli()
+        end
+	end
+	pushRange = behaviour_set[current_behaviour].Push_Range
+	if(pushRange > 0) then
+		-- let everyone in range know we Did The Thing
+		pushStimulus(pushRange)
+	end
+end
+
+function endAnim()
+	-- we finished the animation! What now?
+	if(behaviour_set[current_behaviour].TriggersDecision) then
+		decide()
+	end
+end
+
+function decide()
+	-- we need to choose our next Behaviour.
+	-- Sometimes this is determined by our Intent, sometimes there's an automatic Intent that comes next
+	Engine.logInfo("-- Deciding --")
+end
+
+function pushStimulus(range)
+	currPos = get_vector(Engine.getEntityPosition(g_universe,  this))
+
+	char_root = Engine.findByName(g_universe,-1,"char_root")
+	if char_root == -1 then Engine.logInfo("char_root not found") end
+	child = Engine.getFirstChild(g_universe, char_root)
+	if child == -1 or child == nil then Engine.logInfo("No Children Found For char_root") end
+
+	while child ~= nil and child ~= -1 do
+		-- get the collider child of the character
+		colldier_child = Engine.findByName(g_universe, child, "Collider")
+		newPos = get_vector(Engine.getEntityPosition(g_universe, colldier_child))
+		between = currPos - newPos;
+		dist = between:length()
+		
+		if dist < range then
+			local env = LuaScript.getEnvironment(g_scene_lua_script, child, 1);
+			if env ~= nil and env.pull_stimuli ~= nil then
+				env.push_stimulus(this, currPos)
+			end
+		end
+
+		child = Engine.getNextSibling(g_universe, child)
+	end
 end
 
 function change_to_behaviour(newBehaviourName)
 
 local new_behaviour = behaviour_set[newBehaviourName]
-if (new_behaviour == {} ) then return end
+if (new_behaviour == nil ) then return end
 Engine.logInfo("Changing To Behavior:" .. newBehaviourName)
 current_animation = new_behaviour.Anim
 current_behaviour = newBehaviourName
