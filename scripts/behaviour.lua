@@ -50,7 +50,7 @@ Engine.logInfo("-- BEHAVIOUR SETUP --")
 	behaviour_set = {
 		Walk = { Type = Move_Type, Anim = Anim_Walk, Anim_End = false, Triggers_Decision = false, Decision_Frequency = 0, Push_Range = 0, Pull_Range = 30, Location = nil, Data = nil},
 		Run = { Type = Move_Type, Anim = Anim_Run, Anim_End = false, Triggers_Decision = false, Decision_Frequency = 0, Push_Range = 0, Pull_Range = 10, Location = nil, Data = nil},
-		Idle = { Type = Idle_Type, Anim = Anim_Idle, Anim_End = false, Triggers_Decision = true, Decision_Frequency = 0.5, Push_Range = 0, Pull_Range = 30, Location = nil, Data = nil},
+		Idle = { Type = Idle_Type, Anim = Anim_Idle, Anim_End = false, Triggers_Decision = true, Decision_Frequency = 2.0, Push_Range = 0, Pull_Range = 30, Location = nil, Data = nil},
 		Interact = { Type = Interact_Type, Anim = Anim_Offhand, Anim_End = false, Triggers_Decision = false, Decision_Frequency = 0, Push_Range = 0, Pull_Range = 30, Location = nil, Data = nil},
 --		Drag = { Type = Move_Type, Anim = Anim_Walk, Anim_End = false, Triggers_Decision = false, Push_Range = 0, Pull_Range = 30, Location = nil, Data = nil},
 		Attack = { Type = Interaction_Type, Anim = Anim_Attack, Anim_End = false, Triggers_Decision = false, Decision_Frequency = 0, Push_Range = 0, Pull_Range = 30, Location = nil, Data = nil}
