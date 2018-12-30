@@ -17,7 +17,7 @@
 -- Structure of a Behaviour is:
 -- Type (split update when behaviour run, replaced by different script updates)
 -- Anim set triggered, anim end class (repeat, single)
--- Triggers Decision Points? (Y/N)
+-- Triggers Regular Decision Points? (Y/N)
 -- Decision Point Frequency Base (modified by character stats)
 -- Stimulus Push Range (0=do not push)
 -- Stimulus Pull Range (modified by character stats, 0=do not pull)
@@ -27,6 +27,15 @@
 local behaviour_set = {}
 current_behaviour = ""
 current_anim = 0
+
+-- The Behaviour Queue for this character
+-- This contains the queued-up behaviours. We push (with table.insert) during a Decision, and pop when completed
+-- the popped value (from table.remove) becomes our new current_behaviour.
+-- if #behaviour_queue==0, we trigger a Decision Point by default
+local behaviour_queue = {}
+
+-- some Behaviours (eg Idle) allow characters to make Decisions during them. 
+-- This ticker maintains the time (in seconds) until the next Decision.
 local decision_ticker = 0.0
 
 -- our base reluctance before we'll want to do anything. Characteristics can modify 
@@ -46,7 +55,7 @@ local Anim_Offhand = 5
 
 function init()
 	-- set up the available behaviour set
-Engine.logInfo("-- BEHAVIOUR SETUP --")
+	Engine.logInfo("-- BEHAVIOUR SETUP --")
 	behaviour_set = {
 		Walk = { Type = Move_Type, Anim = Anim_Walk, Anim_End = false, Triggers_Decision = false, Decision_Frequency = 0, Push_Range = 0, Pull_Range = 30, Location = nil, Data = nil},
 		Run = { Type = Move_Type, Anim = Anim_Run, Anim_End = false, Triggers_Decision = false, Decision_Frequency = 0, Push_Range = 0, Pull_Range = 10, Location = nil, Data = nil},
@@ -57,10 +66,10 @@ Engine.logInfo("-- BEHAVIOUR SETUP --")
 --		Attack_Response = { Type = Response_Type, Anim = Anim_Walk, Anim_End = false, Triggers_Decision = false, Push_Range = 0, Pull_Range = 30, Location = nil, Data = nil},
 	}
 
--- set up default behaviour
-change_to_behaviour("Idle")
+	-- set up default behaviour
+	change_to_behaviour("Idle")
 
-Engine.logInfo("-- BEHAVIOUR SETUP END --")
+	Engine.logInfo("-- BEHAVIOUR SETUP END --")
 end
 
 function update(time_delta)
@@ -92,15 +101,7 @@ function update(time_delta)
 
 end
 
-function end_anim()
-	-- this is called from the animation controller when we complete a branch animation state
-	-- Normally we return to Idle, unless our current Behaviour is set to "Make Decision On End"
-	if(behaviour_set[current_behaviour].TriggersDecision) then
-		decide()
-	else
-		change_to_behaviour("Idle")
-	end
-end
+
 
 function decide()
 	-- we need to choose our next Behaviour.
@@ -180,13 +181,74 @@ function pushStimulus(range)
 	end
 end
 
-function change_to_behaviour(newBehaviourName)
+-- -----------------------------------------------------------------------------------
+-- ADDING BEHAVIOURS 
+-- -----------------------------------------------------------------------------------
 
-local new_behaviour = behaviour_set[newBehaviourName]
-if (new_behaviour == nil ) then return end
-Engine.logInfo("Changing To Behavior:" .. newBehaviourName)
-current_anim = new_behaviour.Anim
-current_behaviour = newBehaviourName
-if new_behaviour.Triggers_Decision then decision_ticker = new_behaviour.Decision_Frequency end
+function start_behaviour(newBehaviourName)
+	current_behaviour = newBehaviourName
+	local new_behaviour = behaviour_set[newBehaviourName]
+	current_anim = new_behaviour.Anim
+	
+	-- start decision ticker (if needed)
+	if new_behaviour.Triggers_Decision then decision_ticker = new_behaviour.Decision_Frequency end
 end
 
+-- dump queue, force change to behaviour (use for reactions etc)
+function change_to_behaviour(newBehaviourName)
+	-- sanity check new behaviour
+	local new_behaviour = behaviour_set[newBehaviourName]
+	if (new_behaviour == nil ) then return end
+
+	Engine.logInfo("Changing To Behavior:" .. newBehaviourName)
+
+	-- dump old queue
+	behaviour_queue = {}
+
+	-- set new behaviour
+	start_behaviour(newBehaviourName)
+end
+
+function queue_behaviour(newBehaviourName)
+	-- if we don't currently have a behaviour, we need to start this one immediately
+	-- otherwise we add it to our behaviour queue
+	if current_behaviour == nil then
+		start_behaviour(newBehaviourName)
+	else
+		table.insert(behaviour_queue,newBehaviourName)
+	end
+end
+
+-- -----------------------------------------------------------------------------------
+-- ENDING BEHAVIOURS 
+-- -----------------------------------------------------------------------------------
+
+-- The animation controller is implemented as a network of possible animation state nodes
+-- This can call a function when we enter or leave a node
+-- Since we can set an animation to not repeat, we can use that leaving call to trigger a function here
+-- This lets us know that animation is done and we can complete our action. 
+
+function end_anim()
+	-- (TODO) call the conclusion function for our behaviour
+
+	next_behaviour()
+end
+
+-- Navigation calls onPathFinished on an entity which completes its path
+-- This means we have concluded a Movement-type behaviour and should move to the next one.
+
+function onPathFinished()
+	next_behaviour()
+end
+
+function next_behaviour()
+	-- clear current Behaviour
+	current_behaviour = nil
+	-- Check to see if we have a queued behaviour
+	if(#behaviour_queue > 0) then
+		b = table.remove(behaviour_queue,1)
+		start_behaviour(b)
+	else
+		decide()
+	end
+end
