@@ -29,6 +29,10 @@ current_behaviour = ""
 current_anim = 0
 local decision_ticker = 0.0
 
+-- our base reluctance before we'll want to do anything. Characteristics can modify 
+decision_reluctance = 25.0
+Editor.setPropertyType("decision_reluctance", Editor.FLOAT_PROPERTY)
+
 local Move_Type = 1
 local Idle_Type = 2
 local Interaction_Type = 3
@@ -61,22 +65,23 @@ end
 
 function update(time_delta)
 	local behaviour = behaviour_set[current_behaviour]
-	
-	if(behaviour.Pull_Range > 0) then
-		-- we want to pull stimuli during this animation
-		local env = LuaScript.getEnvironment(g_scene_lua_script, this, 1);
-		if env ~= nil and env.pull_stimuli ~= nil then
-				-- Engine.logInfo("-- Pulling Stimuli --")
-				env.pull_stimuli()
-        end
-	end
-	
-	pushRange = behaviour.Push_Range
-	if(pushRange > 0) then
-		-- let everyone in range know we Did The Thing
-		pushStimulus(pushRange)
-	end
+	if(behaviour ~= nil) then
+		if(behaviour.Pull_Range > 0) then
+			-- we want to pull stimuli during this animation
+			local env = LuaScript.getEnvironment(g_scene_lua_script, this, 1);
+			if env ~= nil and env.pull_stimuli ~= nil then
+					--Engine.logInfo("-- Pulling Stimuli --")
+					env.pull_stimuli()
+			end
+		end
 
+		pushRange = behaviour.Push_Range
+		if(pushRange > 0) then
+			-- let everyone in range know we Did The Thing
+			pushStimulus(pushRange)
+		end
+	end
+	
 	if(decision_ticker > 0.0) then
 		decision_ticker = decision_ticker - time_delta
 		if(decision_ticker <= 0.0) then
@@ -101,6 +106,52 @@ function decide()
 	-- we need to choose our next Behaviour.
 	-- Sometimes this is determined by our Intent, sometimes there's an automatic Intent that comes next
 	Engine.logInfo("-- Deciding --")
+
+	local character_script = LuaScript.getEnvironment(g_scene_lua_script, this, 1);
+	if (character_script ~= nil and character_script.hasCharacteristic ~= nil and character_script.listDrives ~= nil and character_script.getDrive ~= nil) then
+		
+		local reluctance = decision_reluctance
+		if(character_script.hasCharacteristic("Idle")) then
+			reluctance = reluctance + 10
+		end
+
+		-- assemble a list of the probabilities of picking an (above-reluctance) Drive
+		local wanted = {}
+		local total = 0
+		local drives = character_script.listDrives()
+
+		for k,v in ipairs(drives) do
+			val = character_script.getDrive(v)
+			if((character_script.hasCharacteristic("Gluttonous")== true) and (v=="Hunger")) then val = val + 20 end
+			if(val > reluctance) then
+				total = total + val
+				table.insert(wanted, {total,v})
+			end
+		end
+
+		-- pick a Drive from the list
+		local pick = math.random(0,total)
+		for k,v in ipairs(wanted) do
+			if(pick < v[1]) then 
+				-- this is our chosen Drive!
+				if(v[2] == "Idle") then 
+					change_to_behaviour("Idle")
+				else
+					obeyDrive(v[2])
+				end
+			end
+		end
+	end
+
+	local behaviour = behaviour_set[current_behaviour]
+	if behaviour.Triggers_Decision then decision_ticker = behaviour.Decision_Frequency end
+
+	Engine.logInfo("-- End Decision --")
+end
+
+function obeyDrive(drive)
+	-- this function connects Drives to Behaviours
+	Engine.logInfo("-- Obeying Drive " .. drive .. "--")
 end
 
 function pushStimulus(range)

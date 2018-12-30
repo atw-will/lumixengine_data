@@ -127,12 +127,12 @@ end
 -- The value is used as a priority when choosing a Behaviour
 -- ----------------------------------------
 function increaseDrive(drive)
-	Engine.logInfo("Increasing Drive:" .. drive)
 	if(Data["Drives"][drive] == nil) then
 		Data["Drives"][drive] = 1
 	else
 		Data["Drives"][drive] = Data["Drives"][drive] + 1
 	end
+	Engine.logInfo("Increased Drive:" .. drive .. " to " .. Data["Drives"][drive])
 end
 
 function setDrive(drive, value)

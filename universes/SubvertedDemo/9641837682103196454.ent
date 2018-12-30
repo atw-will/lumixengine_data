@@ -97,19 +97,25 @@
 #flags
 	1
 #prop_count
-	2
+	3
 #prop_name
 	"current_behaviour"
 #prop_type
 	4
 #prop_value
-	"0.00000000"
+	""
 #prop_name
 	"current_anim"
 #prop_type
 	1
 #prop_value
-	"Interaction"
+	"0.00000000"
+#prop_name
+	"decision_reluctance"
+#prop_type
+	1
+#prop_value
+	"25.00000000"
 #anim_controller
 	284548379
 #source

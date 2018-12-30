@@ -196,11 +196,13 @@ function update_memory()
 			entry = {entity = entity, position = position, age = 0.0}
 			memorySense[entity] = entry
 		else
-			-- Engine.logInfo("Updating Memory:" .. entity)
 			memorySense[entity].position = position
 			memorySense[entity].age = 0.0
 		end
 	end
+
+	-- this only deals with visual memories, which identify the target entity by default.
+	-- we need to expand this to the auditory sense memory, which contains less information (maybe target class, object or creature?)
 end
 
 function pull_stimuli()
