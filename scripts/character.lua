@@ -1,6 +1,7 @@
 -- AI character information
 -- I've done this in a rather sub-optimal way, with one script instance per character
 -- We could just as easily have all this in a single global table and reference it by entity as key
+-- But this should be easier to understand
 
 local Data = { 
 	Attributes = {
@@ -23,9 +24,9 @@ local basic_needs = { Hunger=10.0 } -- we will add Sleep later. Rest will be bas
 local counters = {}
 
 function init()
-Engine.logInfo("-- CHARACTER SETUP --")
-
-Engine.logInfo("-- CHARACTER SETUP END --")
+	Engine.logInfo("-- CHARACTER SETUP --")
+	generate_character()
+	Engine.logInfo("-- CHARACTER SETUP END --")
 end
 
 function addCounter(name, time)
@@ -188,3 +189,35 @@ function getOpinion(targetEntity)
 end
 
 -- we don't usually list opinions, so there's no function for that
+
+-- ----------------------------------------
+-- CHARACTER CREATION
+-- This early version has a strictly limited set of Characteristics, Drives and Opinions
+-- Attributes are set between 4 and 7. 
+-- Each Characteristic has a specific chance of occurring. The final version will also allow for mutually incompatible etc.
+-- (We do not include "Aware" or "Alerted" or any other contextual Characteristic, only the innate ones)
+-- ----------------------------------------
+
+function generate_character()
+	
+	-- Characteristics table! Add new Characteristics and their probabilities here
+	local characteristics = {	{"Curious", 0.1}, 
+								{"Loner", 0.1},
+								{"Idle", 0.2},
+								{"Gluttonous", 0.1},
+								{"Sharp-Eyed", 0.1},
+								{"Sharp-Eared", 0.1} }
+
+	-- now randomly generate each attribute
+	for k,v in pairs(Data.Attributes) do
+		Data.Attributes[k] = math.random(4,7)
+	end
+
+	-- and randomly determine if each characteristic is present
+	for i = 1,6 do
+		char = characteristics[i]
+		if(math.random() <= char[2]) then
+			setCharacteristic(char[1])
+		end
+	end
+end

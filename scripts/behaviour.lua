@@ -18,6 +18,7 @@
 -- Type (split update when behaviour run, replaced by different script updates)
 -- Anim set triggered, anim end class (repeat, single)
 -- Triggers Decision Points? (Y/N)
+-- Decision Point Frequency Base (modified by character stats)
 -- Stimulus Push Range (0=do not push)
 -- Stimulus Pull Range (modified by character stats, 0=do not pull)
 -- (Optional) Location 
@@ -26,6 +27,7 @@
 local behaviour_set = {}
 current_behaviour = ""
 current_anim = 0
+local decision_ticker = 0.0
 
 local Move_Type = 1
 local Idle_Type = 2
@@ -42,12 +44,12 @@ function init()
 	-- set up the available behaviour set
 Engine.logInfo("-- BEHAVIOUR SETUP --")
 	behaviour_set = {
-		Walk = { Type = Move_Type, Anim = Anim_Walk, Anim_End = false, Triggers_Decision = false, Push_Range = 0, Pull_Range = 30, Location = nil, Data = nil},
-		Run = { Type = Move_Type, Anim = Anim_Run, Anim_End = false, Triggers_Decision = false, Push_Range = 0, Pull_Range = 10, Location = nil, Data = nil},
-		Idle = { Type = Idle_Type, Anim = Anim_Idle, Anim_End = false, Triggers_Decision = true, Push_Range = 0, Pull_Range = 30, Location = nil, Data = nil},
-		Interact = { Type = Interact_Type, Anim = Anim_Offhand, Anim_End = false, Triggers_Decision = false, Push_Range = 0, Pull_Range = 30, Location = nil, Data = nil},
+		Walk = { Type = Move_Type, Anim = Anim_Walk, Anim_End = false, Triggers_Decision = false, Decision_Frequency = 0, Push_Range = 0, Pull_Range = 30, Location = nil, Data = nil},
+		Run = { Type = Move_Type, Anim = Anim_Run, Anim_End = false, Triggers_Decision = false, Decision_Frequency = 0, Push_Range = 0, Pull_Range = 10, Location = nil, Data = nil},
+		Idle = { Type = Idle_Type, Anim = Anim_Idle, Anim_End = false, Triggers_Decision = true, Decision_Frequency = 0.5, Push_Range = 0, Pull_Range = 30, Location = nil, Data = nil},
+		Interact = { Type = Interact_Type, Anim = Anim_Offhand, Anim_End = false, Triggers_Decision = false, Decision_Frequency = 0, Push_Range = 0, Pull_Range = 30, Location = nil, Data = nil},
 --		Drag = { Type = Move_Type, Anim = Anim_Walk, Anim_End = false, Triggers_Decision = false, Push_Range = 0, Pull_Range = 30, Location = nil, Data = nil},
-		Attack = { Type = Interaction_Type, Anim = Anim_Attack, Anim_End = false, Triggers_Decision = false, Push_Range = 0, Pull_Range = 30, Location = nil, Data = nil}
+		Attack = { Type = Interaction_Type, Anim = Anim_Attack, Anim_End = false, Triggers_Decision = false, Decision_Frequency = 0, Push_Range = 0, Pull_Range = 30, Location = nil, Data = nil}
 --		Attack_Response = { Type = Response_Type, Anim = Anim_Walk, Anim_End = false, Triggers_Decision = false, Push_Range = 0, Pull_Range = 30, Location = nil, Data = nil},
 	}
 
@@ -58,7 +60,9 @@ Engine.logInfo("-- BEHAVIOUR SETUP END --")
 end
 
 function update(time_delta)
-	if(behaviour_set[current_behaviour].Pull_Range > 0) then
+	local behaviour = behaviour_set[current_behaviour]
+	
+	if(behaviour.Pull_Range > 0) then
 		-- we want to pull stimuli during this animation
 		local env = LuaScript.getEnvironment(g_scene_lua_script, this, 1);
 		if env ~= nil and env.pull_stimuli ~= nil then
@@ -66,17 +70,30 @@ function update(time_delta)
 				env.pull_stimuli()
         end
 	end
-	pushRange = behaviour_set[current_behaviour].Push_Range
+	
+	pushRange = behaviour.Push_Range
 	if(pushRange > 0) then
 		-- let everyone in range know we Did The Thing
 		pushStimulus(pushRange)
 	end
+
+	if(decision_ticker > 0.0) then
+		decision_ticker = decision_ticker - time_delta
+		if(decision_ticker <= 0.0) then
+			decision_ticker = 0.0 
+			decide()
+		end
+	end
+
 end
 
-function endAnim()
-	-- we finished the animation! What now?
+function end_anim()
+	-- this is called from the animation controller when we complete a branch animation state
+	-- Normally we return to Idle, unless our current Behaviour is set to "Make Decision On End"
 	if(behaviour_set[current_behaviour].TriggersDecision) then
 		decide()
+	else
+		change_to_behaviour("Idle")
 	end
 end
 
@@ -117,7 +134,8 @@ function change_to_behaviour(newBehaviourName)
 local new_behaviour = behaviour_set[newBehaviourName]
 if (new_behaviour == nil ) then return end
 Engine.logInfo("Changing To Behavior:" .. newBehaviourName)
-current_animation = new_behaviour.Anim
+current_anim = new_behaviour.Anim
 current_behaviour = newBehaviourName
+if new_behaviour.Triggers_Decision then decision_ticker = new_behaviour.Decision_Frequency end
 end
 
