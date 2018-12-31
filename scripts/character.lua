@@ -23,10 +23,16 @@ local basic_needs = { Hunger=10.0 } -- we will add Sleep later. Rest will be bas
 -- or otherwise the Drive is incremented
 local counters = {}
 
+function entity_log(output)
+	local name = Engine.getEntityName(g_universe,this)
+	Engine.logInfo(name .. ": " .. output)
+end
+
+
 function init()
-	Engine.logInfo("-- CHARACTER SETUP --")
+	entity_log("-- CHARACTER SETUP --")
 	generate_character()
-	Engine.logInfo("-- CHARACTER SETUP END --")
+	entity_log("-- CHARACTER SETUP END --")
 end
 
 function addCounter(name, time)
@@ -40,7 +46,7 @@ function update(time_delta)
 		counters[key] = counters[key] - time_delta
 		if counters[key] < 0.0 then
 			-- add/increment the drive and drop the counter
-			increaseDrive(key)
+			changeDrive(key,1)
 			counters[key] = nil
 		end
 	end
@@ -126,13 +132,14 @@ end
 -- as a result of a Characteristic.
 -- The value is used as a priority when choosing a Behaviour
 -- ----------------------------------------
-function increaseDrive(drive)
+-- can use this with -ve amount to reduce drives
+function changeDrive(drive, amount)
 	if(Data["Drives"][drive] == nil) then
-		Data["Drives"][drive] = 1
+		Data["Drives"][drive] = amount
 	else
-		Data["Drives"][drive] = Data["Drives"][drive] + 1
+		Data["Drives"][drive] = Data["Drives"][drive] + amount
 	end
-	Engine.logInfo("Increased Drive:" .. drive .. " to " .. Data["Drives"][drive])
+	entity_log("Changed Drive:" .. drive .. " to " .. Data["Drives"][drive])
 end
 
 function setDrive(drive, value)

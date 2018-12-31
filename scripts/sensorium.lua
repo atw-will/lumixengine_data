@@ -36,6 +36,12 @@ local audioSensed = {}
 -- format : {entity, position, age} keyed by entity id
 local memorySense = {}
 
+function entity_log(output)
+	local name = Engine.getEntityName(g_universe,this)
+	Engine.logInfo(name .. ": " .. output)
+end
+
+
 function init()
     clear_memory()
 	clear_senses()
@@ -112,9 +118,9 @@ function pull_get_range()
 	-- check all objects stemming from object_root and char_root 
 	
 	object_root = Engine.findByName(g_universe,-1,"object_root")
-	if object_root == -1 then Engine.logInfo("object_root not found") end
+	if object_root == -1 then entity_log("object_root not found") end
 	child = Engine.getFirstChild(g_universe, object_root)
-	if child == -1 or child == nil then Engine.logInfo("No Children Found For object_root") end
+	if child == -1 or child == nil then entity_log("No Children Found For object_root") end
 	
 	while child ~= nil and child ~= -1 do
 		newPos = get_vector(Engine.getEntityPosition(g_universe, child))
@@ -133,9 +139,9 @@ function pull_get_range()
 	end
 			
 	char_root = Engine.findByName(g_universe,-1,"char_root")
-	if char_root == -1 then Engine.logInfo("char_root not found") end
+	if char_root == -1 then entity_log("char_root not found") end
 	child = Engine.getFirstChild(g_universe, char_root)
-	if child == -1 or child == nil then Engine.logInfo("No Children Found For char_root") end
+	if child == -1 or child == nil then entity_log("No Children Found For char_root") end
 
 	while child ~= nil and child ~= -1 do
 		-- get the collider child of the character
@@ -192,7 +198,7 @@ function update_memory()
 		entity = target["entity"]
 		position = target["position"]
 		if memorySense[entity] == nil then
-			Engine.logInfo("Making Memory:" .. entity)
+			entity_log("Making Memory:" .. entity)
 			entry = {entity = entity, position = position, age = 0.0}
 			memorySense[entity] = entry
 		else

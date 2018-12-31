@@ -16,8 +16,7 @@
 
 -- Structure of a Behaviour is:
 -- Type (split update when behaviour run, replaced by different script updates)
--- Anim set triggered, anim end class (repeat, single)
--- Triggers Regular Decision Points? (Y/N)
+-- Anim state triggered
 -- Decision Point Frequency Base (modified by character stats)
 -- Stimulus Push Range (0=do not push)
 -- Stimulus Pull Range (modified by character stats, 0=do not pull)
@@ -39,7 +38,7 @@ local behaviour_queue = {}
 local decision_ticker = 0.0
 
 -- our base reluctance before we'll want to do anything. Characteristics can modify 
-decision_reluctance = 25.0
+decision_reluctance = 4.0
 Editor.setPropertyType("decision_reluctance", Editor.FLOAT_PROPERTY)
 
 local Move_Type = 1
@@ -53,23 +52,28 @@ local Anim_Run = 3
 local Anim_Attack = 4
 local Anim_Offhand = 5
 
+function entity_log(output)
+	local name = Engine.getEntityName(g_universe,this)
+	Engine.logInfo(name .. ": " .. output)
+end
+
 function init()
 	-- set up the available behaviour set
-	Engine.logInfo("-- BEHAVIOUR SETUP --")
+	entity_log("-- BEHAVIOUR SETUP --")
 	behaviour_set = {
-		Walk = { Type = Move_Type, Anim = Anim_Walk, Anim_End = false, Triggers_Decision = false, Decision_Frequency = 0, Push_Range = 0, Pull_Range = 30, Location = nil, Data = nil},
-		Run = { Type = Move_Type, Anim = Anim_Run, Anim_End = false, Triggers_Decision = false, Decision_Frequency = 0, Push_Range = 0, Pull_Range = 10, Location = nil, Data = nil},
-		Idle = { Type = Idle_Type, Anim = Anim_Idle, Anim_End = false, Triggers_Decision = true, Decision_Frequency = 2.0, Push_Range = 0, Pull_Range = 30, Location = nil, Data = nil},
-		Interact = { Type = Interact_Type, Anim = Anim_Offhand, Anim_End = false, Triggers_Decision = false, Decision_Frequency = 0, Push_Range = 0, Pull_Range = 30, Location = nil, Data = nil},
---		Drag = { Type = Move_Type, Anim = Anim_Walk, Anim_End = false, Triggers_Decision = false, Push_Range = 0, Pull_Range = 30, Location = nil, Data = nil},
-		Attack = { Type = Interaction_Type, Anim = Anim_Attack, Anim_End = false, Triggers_Decision = false, Decision_Frequency = 0, Push_Range = 0, Pull_Range = 30, Location = nil, Data = nil}
---		Attack_Response = { Type = Response_Type, Anim = Anim_Walk, Anim_End = false, Triggers_Decision = false, Push_Range = 0, Pull_Range = 30, Location = nil, Data = nil},
+		Walk = { Type = Move_Type, Anim = Anim_Walk, Decision_Frequency = 0, Push_Range = 0, Pull_Range = 30, Location = nil, Data = nil},
+		Run = { Type = Move_Type, Anim = Anim_Run, Decision_Frequency = 0, Push_Range = 0, Pull_Range = 10, Location = nil, Data = nil},
+		Idle = { Type = Idle_Type, Anim = Anim_Idle, Decision_Frequency = 2.0, Push_Range = 0, Pull_Range = 30, Location = nil, Data = nil},
+		Interact = { Type = Interact_Type, Anim = Anim_Offhand, Decision_Frequency = 0, Push_Range = 0, Pull_Range = 30, Location = nil, Data = nil},
+--		Drag = { Type = Move_Type, Anim = Anim_Walk, Decision_Frequency = 0, Push_Range = 0, Pull_Range = 30, Location = nil, Data = nil},
+		Attack = { Type = Interaction_Type, Anim = Anim_Attack, Decision_Frequency = 0, Push_Range = 0, Pull_Range = 30, Location = nil, Data = nil}
+--		Attack_Response = { Type = Response_Type, Anim = Anim_Walk, Decision_Frequency = 0, Push_Range = 0, Pull_Range = 30, Location = nil, Data = nil},
 	}
 
 	-- set up default behaviour
 	change_to_behaviour("Idle")
 
-	Engine.logInfo("-- BEHAVIOUR SETUP END --")
+	entity_log("-- BEHAVIOUR SETUP END --")
 end
 
 function update(time_delta)
@@ -77,7 +81,7 @@ function update(time_delta)
 	if(behaviour ~= nil) then
 		if(behaviour.Pull_Range > 0) then
 			-- we want to pull stimuli during this animation
-			local env = LuaScript.getEnvironment(g_scene_lua_script, this, 1);
+			local env = LuaScript.getEnvironment(g_scene_lua_script, this, 1)
 			if env ~= nil and env.pull_stimuli ~= nil then
 					--Engine.logInfo("-- Pulling Stimuli --")
 					env.pull_stimuli()
@@ -106,9 +110,10 @@ end
 function decide()
 	-- we need to choose our next Behaviour.
 	-- Sometimes this is determined by our Intent, sometimes there's an automatic Intent that comes next
-	Engine.logInfo("-- Deciding --")
+	entity_log("-- Deciding --")
 
-	local character_script = LuaScript.getEnvironment(g_scene_lua_script, this, 1);
+	local character_script = LuaScript.getEnvironment(g_scene_lua_script, this, 1)
+	local character_script = LuaScript.getEnvironment(g_scene_lua_script, this, 1)
 	if (character_script ~= nil and character_script.hasCharacteristic ~= nil and character_script.listDrives ~= nil and character_script.getDrive ~= nil) then
 		
 		local reluctance = decision_reluctance
@@ -135,11 +140,7 @@ function decide()
 		for k,v in ipairs(wanted) do
 			if(pick < v[1]) then 
 				-- this is our chosen Drive!
-				if(v[2] == "Idle") then 
-					change_to_behaviour("Idle")
-				else
-					obeyDrive(v[2])
-				end
+				obeyDrive(v[2])
 			end
 		end
 	end
@@ -147,15 +148,17 @@ function decide()
 	local behaviour = behaviour_set[current_behaviour]
 	if behaviour.Triggers_Decision then decision_ticker = behaviour.Decision_Frequency end
 
-	Engine.logInfo("-- End Decision --")
+	entity_log("-- End Decision --")
 end
 
 function obeyDrive(drive)
 	-- this function connects Drives to Behaviours
-	Engine.logInfo("-- Obeying Drive " .. drive .. "--")
+	entity_log("-- Obeying Drive " .. drive .. "--")
+	
 end
 
 function pushStimulus(range)
+	entity_log("Pushing Stimuli to all entities in sight")
 	currPos = get_vector(Engine.getEntityPosition(g_universe,  this))
 
 	char_root = Engine.findByName(g_universe,-1,"char_root")
@@ -167,11 +170,11 @@ function pushStimulus(range)
 		-- get the collider child of the character
 		colldier_child = Engine.findByName(g_universe, child, "Collider")
 		newPos = get_vector(Engine.getEntityPosition(g_universe, colldier_child))
-		between = currPos - newPos;
+		between = currPos - newPos
 		dist = between:length()
 		
 		if dist < range then
-			local env = LuaScript.getEnvironment(g_scene_lua_script, child, 1);
+			local env = LuaScript.getEnvironment(g_scene_lua_script, child, 1)
 			if env ~= nil and env.pull_stimuli ~= nil then
 				env.push_stimulus(this, currPos)
 			end
@@ -200,7 +203,7 @@ function change_to_behaviour(newBehaviourName)
 	local new_behaviour = behaviour_set[newBehaviourName]
 	if (new_behaviour == nil ) then return end
 
-	Engine.logInfo("Changing To Behavior:" .. newBehaviourName)
+	entity_log("Force Changing To Behavior:" .. newBehaviourName)
 
 	-- dump old queue
 	behaviour_queue = {}
@@ -212,6 +215,7 @@ end
 function queue_behaviour(newBehaviourName)
 	-- if we don't currently have a behaviour, we need to start this one immediately
 	-- otherwise we add it to our behaviour queue
+	entity_log("Queueing Behaviour")
 	if current_behaviour == nil then
 		start_behaviour(newBehaviourName)
 	else
@@ -229,19 +233,53 @@ end
 -- This lets us know that animation is done and we can complete our action. 
 
 function end_anim()
+	entity_log("Ending Animation")
 	-- (TODO) call the conclusion function for our behaviour
 
-	next_behaviour()
+	end_behaviour()
 end
 
 -- Navigation calls onPathFinished on an entity which completes its path
 -- This means we have concluded a Movement-type behaviour and should move to the next one.
 
 function onPathFinished()
+	entity_log("Ending Navigation")
+	end_behaviour()
+end
+
+function end_behaviour()
+	-- Switch on the Behaviour Type to determine what happens now
+	local behaviour = behaviour_set[current_behaviour]
+
+	if(behaviour.Type == Move_Type) then
+		-- we need to make sure we've stopped
+		Navigation.cancelNavigation(this)
+	elseif(behaviour.Type == Idle_Type) then
+		-- nothing special
+	elseif(behaviour.Type == Interaction_Type) then
+		-- trigger Interaction result depending on target
+		targetEntity = behaviour.Data
+		-- we determine what kind of target entity it is based on its parent
+		parent = Engine.getParent(g_universe,targetEntity)
+		parent_name = Engine.getEntityName(g_universe,targetEntity)
+		if(parent_name == "object_root") then 
+			-- this is an object for interacting with, so we call its Interact function with our Entity id
+			-- (Example: The fridge calls changeDrive on the character script on this entity to reduce our Hunger.)
+			local env = LuaScript.getEnvironment(g_scene_lua_script, targetEntity, 1)
+			if(env ~ nil and env.interact ~= nil) then
+				env.interact(this)
+			end
+		end
+	elseif(behaviour.Type == Response_Type) then
+		-- The response updates us immediately, so once we're done with the response anim there's nothing more to do but move on to decide()
+	end
+
+	-- and move on to the next one
 	next_behaviour()
 end
 
 function next_behaviour()
+	entity_log("Moving To Next Behaviour")
 	-- clear current Behaviour
 	current_behaviour = nil
 	-- Check to see if we have a queued behaviour
