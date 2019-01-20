@@ -2,6 +2,8 @@
 -- Draws raycasts to entities within a given sensory radius, and maintains a list of those entities 
 -- This version works in 360, the final version will operate based on head position/rotation and awareness arc
 
+loadfile("scripts\\npc.lua")
+
 local maf = require("scripts\\maf\\maf")
 
 -- position from which raycasts are made
@@ -26,15 +28,19 @@ Editor.setPropertyType("showVisualDebugLine", Editor.BOOLEAN_PROPERTY)
 showMemoryDebugLine = true
 Editor.setPropertyType("showMemoryDebugLine", Editor.BOOLEAN_PROPERTY)
 
--- these tables contain the sensory data and are cleared every time there is a sense event
+-- these tables contain the most current sensory data and are cleared every time there is a sense event
 -- format : {entity, distance, position} in array format 
 local visualRangeObjects = {}
 local visualSensed = {}
 local audioSensed = {}
 
 -- this table contains the sensory memory and is updated but not cleared when there is a sense event
--- format : {entity, position, age} keyed by entity id
-local memorySense = {}
+-- format : {entity, position, interaction, age} keyed by entity id
+local senseMemory = {}
+
+function get_sense_memory()
+	return senseMemory
+end
 
 function entity_log(output)
 	local name = Engine.getEntityName(g_universe,this)
@@ -50,10 +56,10 @@ end
 function update(time_delta)
 	-- age all the memories
 
-	for key,memory in pairs(memorySense) do
-		--Engine.logInfo("Ageing Memory:" .. key)
+	for key,memory in pairs(senseMemory) do
+		--entity_log("Ageing Memory:" .. key)
 		memory["age"] = memory["age"] + time_delta
-		--Engine.logInfo("Memory " .. key .. " aged to " .. memory["age"])
+		--entity_log("Memory " .. key .. " aged to " .. memory["age"])
 	end
 
 	-- display a debug line from the character to every object it can sense
@@ -81,7 +87,7 @@ function update(time_delta)
 	end
 
 	if(showMemoryDebugLine) then
-		for index,memory in pairs(memorySense) do
+		for index,memory in pairs(senseMemory) do
 			local targetPos = get_Vec3(memory["position"])
 			Renderer.addDebugLine(g_scene_renderer, startPos, targetPos, 0xFF00FF00, 0)
 		end
@@ -101,7 +107,7 @@ function clear_senses()
 end
 
 function clear_memory()
-	for key,memory in pairs(memorySense) do memorySense[key] = {} end
+	for key,memory in pairs(senseMemory) do senseMemory[key] = {} end
 end
 
 function get_vector(arrayVersion)
@@ -113,7 +119,6 @@ function get_Vec3(vectorVersion)
 end
 
 function pull_get_range()
-
 	currPos = get_vector(Engine.getEntityPosition(g_universe,  this))
 	-- check all objects stemming from object_root and char_root 
 	
@@ -197,13 +202,21 @@ function update_memory()
 	for index,target in ipairs(visualSensed,target) do
 		entity = target["entity"]
 		position = target["position"]
-		if memorySense[entity] == nil then
+		if senseMemory[entity] == nil then
 			entity_log("Making Memory:" .. entity)
-			entry = {entity = entity, position = position, age = 0.0}
-			memorySense[entity] = entry
+			entry = {entity = entity, position = position, age = 0.0, interaction = -1}
+			local entity_script = LuaScript.getEnvironment(g_scene_lua_script, this, 0)
+			if(entity_script~=nil and entity_script.get_entity_type ~= nil) then
+				entity_type = entity_script.get_entity_type()
+				if(entity_type == "IPoint") then
+					itype = this.getInteractionType()
+					entity_log("Interaction Type:" .. itype)
+				end
+			end
+			senseMemory[entity] = entry
 		else
-			memorySense[entity].position = position
-			memorySense[entity].age = 0.0
+			senseMemory[entity].position = position
+			senseMemory[entity].age = 0.0
 		end
 	end
 
@@ -219,11 +232,11 @@ function pull_stimuli()
 end
 
 function push_stimulus(entity, position)
-	if memorySense[entity] == {} then
+	if senseMemory[entity] == {} then
 		entry = {entity = entity, position = position, age = 0.0}
-		memorySense[entity] = entry
+		senseMemory[entity] = entry
 	else
-		memorySense[entity].position = position
-		memorySense[entity].age = 0.0
+		senseMemory[entity].position = position
+		senseMemory[entity].age = 0.0
 	end
 end

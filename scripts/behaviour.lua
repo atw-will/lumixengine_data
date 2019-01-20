@@ -2,6 +2,8 @@
 -- Handles memory, decision points
 -- calls on npc_navigation.lua, sensorium.lua, and character.lua
 
+loadfile("scripts\\npc.lua")
+
 -- BEHAVIOUR DESIGN
 -- The final game will have distinct behaviour scripts to allow fine control of behaviours.
 -- This version will instead set up the following Behaviours (from the doc):
@@ -81,16 +83,16 @@ function update(time_delta)
 	if(behaviour ~= nil) then
 		if(behaviour.Pull_Range > 0) then
 			-- we want to pull stimuli during this animation
-			local env = LuaScript.getEnvironment(g_scene_lua_script, this, 1)
-			if env ~= nil and env.pull_stimuli ~= nil then
-					--Engine.logInfo("-- Pulling Stimuli --")
-					env.pull_stimuli()
+			local sensorium = LuaScript.getEnvironment(g_scene_lua_script, this, 2)
+			if sensorium ~= nil and sensorium.pull_stimuli ~= nil then
+					sensorium.pull_stimuli()
 			end
 		end
 
 		pushRange = behaviour.Push_Range
 		if(pushRange > 0) then
 			-- let everyone in range know we Did The Thing
+			entity_log("Pushing Stimulus")
 			pushStimulus(pushRange)
 		end
 	end
@@ -98,6 +100,7 @@ function update(time_delta)
 	if(decision_ticker > 0.0) then
 		decision_ticker = decision_ticker - time_delta
 		if(decision_ticker <= 0.0) then
+			entity_log("Decision Triggered")
 			decision_ticker = 0.0 
 			decide()
 		end
@@ -105,15 +108,13 @@ function update(time_delta)
 
 end
 
-
-
 function decide()
 	-- we need to choose our next Behaviour.
 	-- Sometimes this is determined by our Intent, sometimes there's an automatic Intent that comes next
 	entity_log("-- Deciding --")
 
 	local character_script = LuaScript.getEnvironment(g_scene_lua_script, this, 1)
-	local character_script = LuaScript.getEnvironment(g_scene_lua_script, this, 1)
+
 	if (character_script ~= nil and character_script.hasCharacteristic ~= nil and character_script.listDrives ~= nil and character_script.getDrive ~= nil) then
 		
 		local reluctance = decision_reluctance
@@ -154,6 +155,33 @@ end
 function obeyDrive(drive)
 	-- this function connects Drives to Behaviours
 	entity_log("-- Obeying Drive " .. drive .. "--")
+
+	-- most of these fundamentally do the same thing - search the sensory memory for something that would work with it
+	-- later versions will have two kinds of memory, sense memory and associative memory
+
+	local character_script = LuaScript.getEnvironment(g_scene_lua_script, this, 1)
+	if(character_script ~= nil and character_script.get_sense_memory ~=nil) then
+		local sense_memory = character_script.get_sense_memory()
+		if(sense_memory~=nil) then entity_log("Memories exist!") end
+	end
+
+	if(drive=="Hunger") then
+		-- search sensory memory for food source
+		for k,v in ipairs(sense_memory) do
+			-- if(v[")
+		end
+	elseif(drive=="Contact") then
+		-- search sensory memory for a person to talk to
+	elseif(drive=="Curiosity") then
+		-- choose 4-5 locations with no sensory information
+	elseif(drive=="Investigation") then
+		-- search sensory memory for items flagged "Strange", otherwise do same as Curiosity
+	elseif(drive=="WarnTheWorld") then
+		-- search sensory memory for Exit Points
+	elseif(drive=="Escape") then
+		-- move away from drive subject
+	end
+
 	
 end
 
@@ -174,9 +202,9 @@ function pushStimulus(range)
 		dist = between:length()
 		
 		if dist < range then
-			local env = LuaScript.getEnvironment(g_scene_lua_script, child, 1)
-			if env ~= nil and env.pull_stimuli ~= nil then
-				env.push_stimulus(this, currPos)
+			local sensorium = LuaScript.getEnvironment(g_scene_lua_script, child, 2)
+			if sensorium ~= nil and sensorium.pull_stimuli ~= nil then
+				sensorium.push_stimulus(this, currPos)
 			end
 		end
 
@@ -265,9 +293,9 @@ function end_behaviour()
 		if(parent_name == "object_root") then 
 			-- this is an object for interacting with, so we call its Interact function with our Entity id
 			-- (Example: The fridge calls changeDrive on the character script on this entity to reduce our Hunger.)
-			local env = LuaScript.getEnvironment(g_scene_lua_script, targetEntity, 1)
-			if(env ~ nil and env.interact ~= nil) then
-				env.interact(this)
+			local entityScript = LuaScript.getEnvironment(g_scene_lua_script, targetEntity, 0)
+			if(entityScript ~ nil and entityScript.interact ~= nil) then
+				entityScript.interact(this)
 			end
 		end
 	elseif(behaviour.Type == Response_Type) then

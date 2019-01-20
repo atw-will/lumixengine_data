@@ -30,5 +30,27 @@
 	0
 #source
 	"models/furniture/refrigerator close.phy"
+#lua_script
+	4143584752
+#count
+	1
+#source
+	"scripts/entity_ipoint.lua"
+#flags
+	1
+#prop_count
+	2
+#prop_name
+	"interactionType"
+#prop_type
+	1
+#prop_value
+	"1.00000000"
+#prop_name
+	"driveReduction"
+#prop_type
+	1
+#prop_value
+	"-1.00000000"
 #cmp_end
 	0

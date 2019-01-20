@@ -25,7 +25,19 @@
 #lua_script
 	4143584752
 #count
-	4
+	5
+#source
+	"scripts/entity_character.lua"
+#flags
+	1
+#prop_count
+	0
+#source
+	"scripts/character.lua"
+#flags
+	1
+#prop_count
+	0
 #source
 	"scripts/npc_navigation.lua"
 #flags
@@ -86,12 +98,6 @@
 	0
 #prop_value
 	"true"
-#source
-	"scripts/character.lua"
-#flags
-	1
-#prop_count
-	0
 #source
 	"scripts/behaviour.lua"
 #flags

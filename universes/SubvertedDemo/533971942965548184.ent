@@ -25,25 +25,13 @@
 #lua_script
 	4143584752
 #count
-	2
+	3
 #source
-	"scripts/navigation.lua"
+	"scripts/entity_character.lua"
 #flags
 	1
 #prop_count
-	2
-#prop_name
-	"speed"
-#prop_type
-	1
-#prop_value
-	"4.00000000"
-#prop_name
-	"stopdist"
-#prop_type
-	1
-#prop_value
-	"0.20000000"
+	0
 #source
 	"scripts/sensorium.lua"
 #flags
@@ -86,6 +74,24 @@
 	0
 #prop_value
 	"true"
+#source
+	"scripts/navigation.lua"
+#flags
+	1
+#prop_count
+	2
+#prop_name
+	"speed"
+#prop_type
+	1
+#prop_value
+	"4.00000000"
+#prop_name
+	"stopdist"
+#prop_type
+	1
+#prop_value
+	"0.20000000"
 #anim_controller
 	284548379
 #source

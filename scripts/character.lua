@@ -3,6 +3,8 @@
 -- We could just as easily have all this in a single global table and reference it by entity as key
 -- But this should be easier to understand
 
+loadfile("scripts\\npc.lua")
+
 local Data = { 
 	Attributes = {
 				  Strength = {},
@@ -218,6 +220,7 @@ function generate_character()
 	-- now randomly generate each attribute
 	for k,v in pairs(Data.Attributes) do
 		Data.Attributes[k] = math.random(4,7)
+		entity_log("Set attribute:" .. Data.Attributes[k])
 	end
 
 	-- and randomly determine if each characteristic is present
@@ -225,6 +228,7 @@ function generate_character()
 		char = characteristics[i]
 		if(math.random() <= char[2]) then
 			setCharacteristic(char[1])
+			entity_log("Added characteristic:" .. char[1])
 		end
 	end
 end
