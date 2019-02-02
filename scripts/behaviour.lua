@@ -2,7 +2,7 @@
 -- Handles memory, decision points
 -- calls on npc_navigation.lua, sensorium.lua, and character.lua
 
-loadfile("scripts\\npc.lua")
+dofile("scripts\\npc.lua")
 
 -- BEHAVIOUR DESIGN
 -- The final game will have distinct behaviour scripts to allow fine control of behaviours.
@@ -83,7 +83,7 @@ function update(time_delta)
 	if(behaviour ~= nil) then
 		if(behaviour.Pull_Range > 0) then
 			-- we want to pull stimuli during this animation
-			local sensorium = LuaScript.getEnvironment(g_scene_lua_script, this, 2)
+			local sensorium = LuaScript.getEnvironment(g_scene_lua_script, this, Scripts.SENSORIUM_SCRIPT)
 			if sensorium ~= nil and sensorium.pull_stimuli ~= nil then
 					sensorium.pull_stimuli()
 			end
@@ -113,7 +113,7 @@ function decide()
 	-- Sometimes this is determined by our Intent, sometimes there's an automatic Intent that comes next
 	entity_log("-- Deciding --")
 
-	local character_script = LuaScript.getEnvironment(g_scene_lua_script, this, 1)
+	local character_script = LuaScript.getEnvironment(g_scene_lua_script, this, Scripts.CHARACTER_SCRIPT)
 
 	if (character_script ~= nil and character_script.hasCharacteristic ~= nil and character_script.listDrives ~= nil and character_script.getDrive ~= nil) then
 		
@@ -121,6 +121,8 @@ function decide()
 		if(character_script.hasCharacteristic("Idle")) then
 			reluctance = reluctance + 10
 		end
+
+		entity_log("Action Reluctance:" .. reluctance)
 
 		-- assemble a list of the probabilities of picking an (above-reluctance) Drive
 		local wanted = {}
@@ -136,6 +138,8 @@ function decide()
 			end
 		end
 
+		entity_log("Total possibility:" .. total)
+
 		-- pick a Drive from the list
 		local pick = math.random(0,total)
 		for k,v in ipairs(wanted) do
@@ -144,10 +148,12 @@ function decide()
 				obeyDrive(v[2])
 			end
 		end
+	else
+		entity_log("Something wasn't found")
 	end
 
 	local behaviour = behaviour_set[current_behaviour]
-	if behaviour.Triggers_Decision then decision_ticker = behaviour.Decision_Frequency end
+	if (behaviour.Decision_Frequency > 0) then decision_ticker = behaviour.Decision_Frequency end
 
 	entity_log("-- End Decision --")
 end
@@ -159,9 +165,9 @@ function obeyDrive(drive)
 	-- most of these fundamentally do the same thing - search the sensory memory for something that would work with it
 	-- later versions will have two kinds of memory, sense memory and associative memory
 
-	local character_script = LuaScript.getEnvironment(g_scene_lua_script, this, 1)
-	if(character_script ~= nil and character_script.get_sense_memory ~=nil) then
-		local sense_memory = character_script.get_sense_memory()
+	local sensorium_script = LuaScript.getEnvironment(g_scene_lua_script, this, Scripts.SENSORIUM_SCRIPT)
+	if(sensorium_script ~= nil and sensorium_script.get_sense_memory ~=nil) then
+		local sense_memory = sensorium_script.get_sense_memory()
 		if(sense_memory~=nil) then entity_log("Memories exist!") end
 	end
 
@@ -202,7 +208,7 @@ function pushStimulus(range)
 		dist = between:length()
 		
 		if dist < range then
-			local sensorium = LuaScript.getEnvironment(g_scene_lua_script, child, 2)
+			local sensorium = LuaScript.getEnvironment(g_scene_lua_script, child, Scripts.SENSORIUM_SCRIPT)
 			if sensorium ~= nil and sensorium.pull_stimuli ~= nil then
 				sensorium.push_stimulus(this, currPos)
 			end
@@ -222,7 +228,7 @@ function start_behaviour(newBehaviourName)
 	current_anim = new_behaviour.Anim
 	
 	-- start decision ticker (if needed)
-	if new_behaviour.Triggers_Decision then decision_ticker = new_behaviour.Decision_Frequency end
+	if (new_behaviour.Decision_Frequency > 0) then decision_ticker = new_behaviour.Decision_Frequency end
 end
 
 -- dump queue, force change to behaviour (use for reactions etc)
@@ -293,7 +299,7 @@ function end_behaviour()
 		if(parent_name == "object_root") then 
 			-- this is an object for interacting with, so we call its Interact function with our Entity id
 			-- (Example: The fridge calls changeDrive on the character script on this entity to reduce our Hunger.)
-			local entityScript = LuaScript.getEnvironment(g_scene_lua_script, targetEntity, 0)
+			local entityScript = LuaScript.getEnvironment(g_scene_lua_script, targetEntity, Scripts.ENTITY_SCRIPT)
 			if(entityScript ~ nil and entityScript.interact ~= nil) then
 				entityScript.interact(this)
 			end
