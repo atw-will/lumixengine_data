@@ -145,15 +145,23 @@ function decide()
 		for k,v in ipairs(wanted) do
 			if(pick < v[1]) then 
 				-- this is our chosen Drive!
+				entity_log("Pre-Obey")
 				obeyDrive(v[2])
+				entity_log("Post-Obey")
 			end
 		end
 	else
 		entity_log("Something wasn't found")
 	end
 
+	entity_log("behaviour starting: " .. current_behaviour)
+	
 	local behaviour = behaviour_set[current_behaviour]
+
+	-- entity_log("behaviour type:" .. behaviour)
 	if (behaviour.Decision_Frequency > 0) then decision_ticker = behaviour.Decision_Frequency end
+
+	entity_log("Behaviour Timer:" .. behaviour.Decision_Frequency)
 
 	entity_log("-- End Decision --")
 end
@@ -166,15 +174,18 @@ function obeyDrive(drive)
 	-- later versions will have two kinds of memory, sense memory and associative memory
 
 	local sensorium_script = LuaScript.getEnvironment(g_scene_lua_script, this, Scripts.SENSORIUM_SCRIPT)
+	local sense_memory = nil;
 	if(sensorium_script ~= nil and sensorium_script.get_sense_memory ~=nil) then
-		local sense_memory = sensorium_script.get_sense_memory()
+		sense_memory = sensorium_script.get_sense_memory()
 		if(sense_memory~=nil) then entity_log("Memories exist!") end
 	end
 
 	if(drive=="Hunger") then
 		-- search sensory memory for food source
-		for k,v in ipairs(sense_memory) do
-			-- if(v[")
+		if(sense_memory~=nil) then
+			for k,v in ipairs(sense_memory) do
+				-- if(v[")
+			end
 		end
 	elseif(drive=="Contact") then
 		-- search sensory memory for a person to talk to
@@ -188,6 +199,7 @@ function obeyDrive(drive)
 		-- move away from drive subject
 	end
 
+	entity_log("Drive Set")
 	
 end
 
