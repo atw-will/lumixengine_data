@@ -21,3 +21,7 @@ function travelTo(pos)
 	Navigation.navigate(g_scene_navigation, this, pos, speed, stopdist)
 end
 
+function setSpeed(spd)
+	speed = spd
+end
+

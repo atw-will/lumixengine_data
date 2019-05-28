@@ -204,14 +204,24 @@ function update_memory()
 		position = target["position"]
 		if senseMemory[entity] == nil then
 			entity_log("Making Memory:" .. entity)
-			entry = {entity = entity, position = position, age = 0.0, interaction = -1}
-			local entity_script = LuaScript.getEnvironment(g_scene_lua_script, this, 0)
+			entry = {entity = entity, position = position, age = 0.0, type = nil, interaction = nil}	
+			local entity_script = LuaScript.getEnvironment(g_scene_lua_script, entity, 0)		
 			if(entity_script~=nil and entity_script.get_entity_type ~= nil) then
 				entity_type = entity_script.get_entity_type()
+				entry.type = entity_type
 				if(entity_type == "IPoint") then
-					itype = this.getInteractionType()
-					entity_log("Interaction Type:" .. itype)
+					if(entity_script.getInteractionType ~= nil) then
+						itype = entity_script.getInteractionType()
+						entity_log("Interaction Type Found:" .. itype)
+						entry.interaction = itype
+					else
+						entity_log("Interaction Type Function Does Not Exist:" .. entity)
+					end
+				else
+					entity_log("Entity Is Not An Interaction Point:" .. entity)
 				end
+			else
+				entity_log("Entity Script Does Not Exist:" .. entity)
 			end
 			senseMemory[entity] = entry
 		else
@@ -233,7 +243,7 @@ end
 
 function push_stimulus(entity, position)
 	if senseMemory[entity] == {} then
-		entry = {entity = entity, position = position, age = 0.0}
+		entry = {entity = entity, position = position, age = 0.0, type = nil, interaction = nil}
 		senseMemory[entity] = entry
 	else
 		senseMemory[entity].position = position

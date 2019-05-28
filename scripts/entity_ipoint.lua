@@ -17,11 +17,19 @@ end
 interactionType = 0
 Editor.setPropertyType("interactionType", Editor.FLOAT_PROPERTY) 
 
+function getInteractionType()
+	return interactionType
+end
+
 -- interaction drive reduction
 -- -1 = completely reduce
 
 driveReduction = -1
 Editor.setPropertyType("driveReduction", Editor.FLOAT_PROPERTY)
+
+function getDriveReduction()
+	return driveReduction
+end
 
 function interact(entity)
 -- There are two kinds of IPoint - Relievers and Doers. 

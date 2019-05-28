@@ -107,9 +107,9 @@
 #prop_name
 	"current_behaviour"
 #prop_type
-	4
+	1
 #prop_value
-	""
+	"0.00000000"
 #prop_name
 	"current_anim"
 #prop_type
@@ -121,7 +121,7 @@
 #prop_type
 	1
 #prop_value
-	"3.00000000"
+	"1.00000000"
 #anim_controller
 	284548379
 #source

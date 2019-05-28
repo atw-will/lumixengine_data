@@ -25,8 +25,9 @@ dofile("scripts\\npc.lua")
 -- (Optional) Location 
 -- (Optional) Data
 
+-- this is the template set
 local behaviour_set = {}
-current_behaviour = ""
+current_behaviour = {}
 current_anim = 0
 
 -- The Behaviour Queue for this character
@@ -63,12 +64,12 @@ function init()
 	-- set up the available behaviour set
 	entity_log("-- BEHAVIOUR SETUP --")
 	behaviour_set = {
-		Walk = { Type = Move_Type, Anim = Anim_Walk, Decision_Frequency = 0, Push_Range = 0, Pull_Range = 30, Location = nil, Data = nil},
-		Run = { Type = Move_Type, Anim = Anim_Run, Decision_Frequency = 0, Push_Range = 0, Pull_Range = 10, Location = nil, Data = nil},
-		Idle = { Type = Idle_Type, Anim = Anim_Idle, Decision_Frequency = 2.0, Push_Range = 0, Pull_Range = 30, Location = nil, Data = nil},
-		Interact = { Type = Interact_Type, Anim = Anim_Offhand, Decision_Frequency = 0, Push_Range = 0, Pull_Range = 30, Location = nil, Data = nil},
+		Walk = { Name = "Walk", Type = Move_Type, Anim = Anim_Walk, Decision_Frequency = 0, Push_Range = 0, Pull_Range = 30, Location = nil, Data = nil},
+		Run = { Name = "Run", Type = Move_Type, Anim = Anim_Run, Decision_Frequency = 0, Push_Range = 0, Pull_Range = 10, Location = nil, Data = nil},
+		Idle = { Name = "Idle", Type = Idle_Type, Anim = Anim_Idle, Decision_Frequency = 2.0, Push_Range = 0, Pull_Range = 30, Location = nil, Data = nil},
+		Interact = { Name = "Interact", Type = Interact_Type, Anim = Anim_Offhand, Decision_Frequency = 0, Push_Range = 0, Pull_Range = 30, Location = nil, Data = nil},
 --		Drag = { Type = Move_Type, Anim = Anim_Walk, Decision_Frequency = 0, Push_Range = 0, Pull_Range = 30, Location = nil, Data = nil},
-		Attack = { Type = Interaction_Type, Anim = Anim_Attack, Decision_Frequency = 0, Push_Range = 0, Pull_Range = 30, Location = nil, Data = nil}
+--		Attack = { Name = "Attack", Type = Interaction_Type, Anim = Anim_Attack, Decision_Frequency = 0, Push_Range = 0, Pull_Range = 30, Location = nil, Data = nil}
 --		Attack_Response = { Type = Response_Type, Anim = Anim_Walk, Decision_Frequency = 0, Push_Range = 0, Pull_Range = 30, Location = nil, Data = nil},
 	}
 
@@ -79,17 +80,19 @@ function init()
 end
 
 function update(time_delta)
-	local behaviour = behaviour_set[current_behaviour]
-	if(behaviour ~= nil) then
-		if(behaviour.Pull_Range > 0) then
-			-- we want to pull stimuli during this animation
-			local sensorium = LuaScript.getEnvironment(g_scene_lua_script, this, Scripts.SENSORIUM_SCRIPT)
-			if sensorium ~= nil and sensorium.pull_stimuli ~= nil then
-					sensorium.pull_stimuli()
+
+	if(current_behaviour ~= nil) then
+		if(current_behaviour.Pull_Range ~= nil) then
+			if(current_behaviour.Pull_Range > 0) then
+				-- we want to pull stimuli during this animation
+				local sensorium = LuaScript.getEnvironment(g_scene_lua_script, this, Scripts.SENSORIUM_SCRIPT)
+				if sensorium ~= nil and sensorium.pull_stimuli ~= nil then
+						sensorium.pull_stimuli()
+				end
 			end
 		end
 
-		pushRange = behaviour.Push_Range
+		pushRange = current_behaviour.Push_Range
 		if(pushRange > 0) then
 			-- let everyone in range know we Did The Thing
 			entity_log("Pushing Stimulus")
@@ -107,6 +110,7 @@ function update(time_delta)
 	end
 
 end
+
 
 function decide()
 	-- we need to choose our next Behaviour.
@@ -154,14 +158,12 @@ function decide()
 		entity_log("Something wasn't found")
 	end
 
-	entity_log("behaviour starting: " .. current_behaviour)
-	
-	local behaviour = behaviour_set[current_behaviour]
+	entity_log("behaviour starting: " .. current_behaviour.Name)
 
 	-- entity_log("behaviour type:" .. behaviour)
-	if (behaviour.Decision_Frequency > 0) then decision_ticker = behaviour.Decision_Frequency end
+	if (current_behaviour.Decision_Frequency > 0) then decision_ticker = current_behaviour.Decision_Frequency end
 
-	entity_log("Behaviour Timer:" .. behaviour.Decision_Frequency)
+	entity_log("Behaviour Timer:" .. current_behaviour.Decision_Frequency)
 
 	entity_log("-- End Decision --")
 end
@@ -183,8 +185,21 @@ function obeyDrive(drive)
 	if(drive=="Hunger") then
 		-- search sensory memory for food source
 		if(sense_memory~=nil) then
-			for k,v in ipairs(sense_memory) do
-				-- if(v[")
+			entity_log("Hunger Trigger!")
+			for k,v in pairs(sense_memory) do
+				if(v.position~=nil) then
+					pos = sensorium_script.get_Vec3(v.position)
+					entity_log("Sense Memory Entity:" .. v.entity .. " Age:" .. v.age .. " Type:" .. v.type .. " Position:(" .. pos[1] .. "," .. pos[2] .. "," .. pos[3] .. ")")
+					if(v.interaction ~= nil) then
+						entity_log("Interaction Class" .. v.interaction)
+						if(v.interaction == 1) then
+							foodthing = v.entity
+							entity_log("Found Food!")
+							start_behaviour("Walk",pos,foodthing)
+							queue_behaviour("Interact",pos,foodthing)
+						end
+					end
+				end
 			end
 		end
 	elseif(drive=="Contact") then
@@ -199,7 +214,7 @@ function obeyDrive(drive)
 		-- move away from drive subject
 	end
 
-	entity_log("Drive Set")
+	entity_log("Drive Check Completed")
 	
 end
 
@@ -234,17 +249,69 @@ end
 -- ADDING BEHAVIOURS 
 -- -----------------------------------------------------------------------------------
 
-function start_behaviour(newBehaviourName)
-	current_behaviour = newBehaviourName
+function start_behaviour(newBehaviourName, location, data)
 	local new_behaviour = behaviour_set[newBehaviourName]
-	current_anim = new_behaviour.Anim
-	
-	-- start decision ticker (if needed)
-	if (new_behaviour.Decision_Frequency > 0) then decision_ticker = new_behaviour.Decision_Frequency end
+	if (new_behaviour == nil ) then return end
+	new_behaviour.Location = location
+	new_behaviour.Data = data
+	behaviour_init(new_behaviour)
 end
 
+function behaviour_init(newBehaviour)
+	-- set behaviour
+	current_behaviour = newBehaviour
+	current_anim = newBehaviour.Anim
+	-- start decision ticker (if needed)
+	if (newBehaviour.Decision_Frequency > 0) then decision_ticker = newBehaviour.Decision_Frequency end
+
+	-- now switch on the behaviour type
+	if (current_behaviour.Type == Move_Type) then
+		-- start movement
+		local navigation_script = LuaScript.getEnvironment(g_scene_lua_script, this, Scripts.NAVGATION_SCRIPT)
+		if(navigation_script ~= nil) then
+			if(current_behaviour.Name == "Walk") then 
+				-- Move at speed 2
+				if(navigation_script.setSpeed ~= nil) then
+					navigation_script.setSpeed(2)
+				end
+			elseif(current_behaviour.Name == "Run") then
+				-- Move at speed 4
+				if(navigation_script.setSpeed ~= nil) then
+					navigation_script.setSpeed(4)
+				end
+			end
+			-- begin navigating to point
+			if(navigation_script.travelTo ~= nil) then
+				navigation_script.travelTo(current_behaviour.Location)
+			end
+		end
+	elseif (current_behaviour.Type == Interaction_Type) then
+
+	elseif (current_behaviour.Type == Idle_Type) then
+
+	elseif (current_behaviour.Type == Response_Type) then
+
+	end
+end
+
+function queue_behaviour(newBehaviourName,location,data)
+	-- if we don't currently have a behaviour, we need to start this one immediately
+	-- otherwise we add it to our behaviour queue
+	if current_behaviour == nil then
+		entity_log("Queueing Behaviour: Default Start")
+		start_behaviour(newBehaviourName,location,dats)
+	else
+		entity_log("Queueing Behaviour: Adding To Queue")
+		queued_behaviour = behaviour_set[newBehaviourName] 
+		queued_behaviour.Location = location
+		queued_behaviour.Data = data
+		table.insert(behaviour_queue,queued_behaviour)
+	end
+end
+
+
 -- dump queue, force change to behaviour (use for reactions etc)
-function change_to_behaviour(newBehaviourName)
+function change_to_behaviour(newBehaviourName,location,data)
 	-- sanity check new behaviour
 	local new_behaviour = behaviour_set[newBehaviourName]
 	if (new_behaviour == nil ) then return end
@@ -255,19 +322,10 @@ function change_to_behaviour(newBehaviourName)
 	behaviour_queue = {}
 
 	-- set new behaviour
-	start_behaviour(newBehaviourName)
+	start_behaviour(newBehaviourName,location,data)
 end
 
-function queue_behaviour(newBehaviourName)
-	-- if we don't currently have a behaviour, we need to start this one immediately
-	-- otherwise we add it to our behaviour queue
-	entity_log("Queueing Behaviour")
-	if current_behaviour == nil then
-		start_behaviour(newBehaviourName)
-	else
-		table.insert(behaviour_queue,newBehaviourName)
-	end
-end
+
 
 -- -----------------------------------------------------------------------------------
 -- ENDING BEHAVIOURS 
@@ -295,16 +353,15 @@ end
 
 function end_behaviour()
 	-- Switch on the Behaviour Type to determine what happens now
-	local behaviour = behaviour_set[current_behaviour]
 
-	if(behaviour.Type == Move_Type) then
+	if(current_behaviour.Type == Move_Type) then
 		-- we need to make sure we've stopped
 		Navigation.cancelNavigation(this)
-	elseif(behaviour.Type == Idle_Type) then
+	elseif(current_behaviour.Type == Idle_Type) then
 		-- nothing special
-	elseif(behaviour.Type == Interaction_Type) then
+	elseif(current_behaviour.Type == Interaction_Type) then
 		-- trigger Interaction result depending on target
-		targetEntity = behaviour.Data
+		targetEntity = current_behaviour.Data
 		-- we determine what kind of target entity it is based on its parent
 		parent = Engine.getParent(g_universe,targetEntity)
 		parent_name = Engine.getEntityName(g_universe,targetEntity)
@@ -312,11 +369,11 @@ function end_behaviour()
 			-- this is an object for interacting with, so we call its Interact function with our Entity id
 			-- (Example: The fridge calls changeDrive on the character script on this entity to reduce our Hunger.)
 			local entityScript = LuaScript.getEnvironment(g_scene_lua_script, targetEntity, Scripts.ENTITY_SCRIPT)
-			if(entityScript ~ nil and entityScript.interact ~= nil) then
+			if(entityScript ~= nil and entityScript.interact ~= nil) then
 				entityScript.interact(this)
 			end
 		end
-	elseif(behaviour.Type == Response_Type) then
+	elseif(current_behaviour.Type == Response_Type) then
 		-- The response updates us immediately, so once we're done with the response anim there's nothing more to do but move on to decide()
 	end
 
@@ -330,8 +387,8 @@ function next_behaviour()
 	current_behaviour = nil
 	-- Check to see if we have a queued behaviour
 	if(#behaviour_queue > 0) then
-		b = table.remove(behaviour_queue,1)
-		start_behaviour(b)
+		next_behaviour = table.remove(behaviour_queue,1)
+		behaviour_init(next_behavior)
 	else
 		decide()
 	end
